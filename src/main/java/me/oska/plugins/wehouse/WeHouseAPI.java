@@ -18,32 +18,41 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import me.oska.minecraft.OskaRPG;
-import org.bukkit.Bukkit;
+import me.oska.plugins.logger.Logger;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
 
 public class WeHouseAPI {
 
-    private static final HashSet<String> cdMap = new HashSet();
+    /*
+        // Pasting
+        cut   -> uuid-terrain.schem
+        paste -> uuid-house.schem
 
-    public static void cut(Player player, double x, double y, double z, double size, double height) {
-        if (size % 2 == 0) {
-            throw new IllegalArgumentException("size must be odd number.");
-        }
+        // Cutting
+        cut -> uuid-house.schem
+        paste -> uuid-terrain.schem
+    */
 
-        double midpoint = (size - 1) / 2;
+    public static void cut(WeHouseCutOptions options) throws WorldEditException, IOException {
+        double x = options.getX();
+        double y = options.getY();
+        double z = options.getZ();
+        double height = options.getHeight();
+        double midpoint = options.getMidpoint();
+        Player player = options.getPlayer();
+
         World world = BukkitAdapter.adapt(player.getWorld());
         BlockVector3 pos1 = BlockVector3.at(x + midpoint, y, z - midpoint);
         BlockVector3 pos2 = BlockVector3.at(x - midpoint, y + (height - 1), z + midpoint);
         CuboidRegion region = new CuboidRegion(world, pos1, pos2);
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         EditSessionFactory factory = WorldEdit.getInstance().getEditSessionFactory();
-        File file = new File(OskaRPG.getWeHouseFolder(), player.getUniqueId().toString());
+        File file = new File(OskaRPG.getWeHouseFolder(), player.getUniqueId().toString() +".schem");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -64,23 +73,19 @@ public class WeHouseAPI {
             copy.setSourceFunction(replacement);
             Operations.complete(copy);
             writer.write(clipboard);
-        } catch (WorldEditException | IOException e) {
-            e.printStackTrace();
-        } finally {
-            Bukkit.getConsoleSender().sendMessage("clipboard copied successfully.");
         }
     }
 
-    public static boolean paste(Player player, double x, double y, double z, double size) {
+    public static void paste(WeHousePasteOptions options) throws WorldEditException, IOException {
+        Player player = options.getPlayer();
         String uuid = player.getUniqueId().toString();
-        if (cdMap.contains(uuid)) {
-            return false;
-        }
-
+        double x = options.getX();
+        double y = options.getY();
+        double z = options.getZ();
+        double midpoint = options.getMidpoint();
         Clipboard clipboard;
         World world = BukkitAdapter.adapt(player.getWorld());
-        double midpoint = (size - 1) / 2;
-        File file = new File(OskaRPG.getWeHouseFolder(), uuid);
+        File file = new File(OskaRPG.getWeHouseFolder(), uuid + ".schem");
         EditSessionFactory factory = WorldEdit.getInstance().getEditSessionFactory();
         try (
                 ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getReader(new FileInputStream(file));
@@ -94,11 +99,6 @@ public class WeHouseAPI {
                     .to(BlockVector3.at(x - midpoint,y,z-midpoint))
                     .build();
             Operations.complete(operation);
-        } catch (IOException | WorldEditException e) {
-            e.printStackTrace();
-        } finally {
-            cdMap.add(uuid);
         }
-        return true;
     }
 }

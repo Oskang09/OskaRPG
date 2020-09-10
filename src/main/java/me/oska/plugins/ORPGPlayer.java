@@ -2,6 +2,13 @@ package me.oska.plugins;
 
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.openjpa.exception.RunicException;
+import me.oska.plugins.orpg.Accuracy;
+import me.oska.plugins.orpg.Dexterity;
+import me.oska.plugins.orpg.GraphicLevel;
+import me.oska.plugins.orpg.Strength;
+import org.apache.openjpa.persistence.Externalizer;
+import org.apache.openjpa.persistence.Factory;
+import org.apache.openjpa.persistence.Persistent;
 import org.bukkit.entity.Player;
 
 import javax.persistence.*;
@@ -21,6 +28,24 @@ public class ORPGPlayer {
     private String uuid;
     private String name;
 
+    @Enumerated(EnumType.ORDINAL)
+    private GraphicLevel graphic;
+
+    @Persistent
+    @Externalizer("toSQL")
+    @Factory("fromSQL")
+    private Strength strength;
+
+    @Persistent
+    @Externalizer("toSQL")
+    @Factory("fromSQL")
+    private Dexterity dexterity;
+
+    @Persistent
+    @Externalizer("toSQL")
+    @Factory("fromSQL")
+    private Accuracy accuracy;
+
     public static ORPGPlayer load(Player player) {
         ORPGPlayer instance = null;
         try {
@@ -29,6 +54,7 @@ public class ORPGPlayer {
                     () -> { 
                         ORPGPlayer entity = new ORPGPlayer();
                         entity.uuid = player.getUniqueId().toString();
+                        entity.graphic = GraphicLevel.LOW;
                         return entity;
                     }
             );

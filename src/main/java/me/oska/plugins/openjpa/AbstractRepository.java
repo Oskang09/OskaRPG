@@ -63,7 +63,7 @@ public class AbstractRepository<T> {
         return entity;
     }
 
-    public synchronized void editAsync(T entity, AsyncCallBackObject<T> asyncCallBackObject, AsyncCallBackExceptionHandler asyncCallBackExceptionHandler) {
+    public void editAsync(T entity, AsyncCallBackObject<T> asyncCallBackObject, AsyncCallBackExceptionHandler asyncCallBackExceptionHandler) {
         new Thread(() -> {
             try {
                 asyncCallBackObject.done(edit(entity));

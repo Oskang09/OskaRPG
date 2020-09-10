@@ -1,6 +1,9 @@
 package me.oska.minecraft.listener;
 
+import me.oska.plugins.logger.Logger;
 import me.oska.plugins.wehouse.WeHouseAPI;
+import me.oska.plugins.wehouse.WeHouseCutOptions;
+import me.oska.plugins.wehouse.WeHousePasteOptions;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -10,17 +13,22 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class TestListener implements Listener {
+
+    public static Logger log = new Logger("TestListener");
+
     @EventHandler
     public void on(PlayerInteractEvent event) {
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Player player = event.getPlayer();
             Block block = event.getClickedBlock();
             if (event.getClickedBlock().getType() == Material.WHITE_WOOL) {
-                WeHouseAPI.cut(player, block.getX(), block.getY(), block.getZ(), 5, 4);
+                WeHouseCutOptions options = new WeHouseCutOptions(player, block, 5, 4);
+                log.withTracker("wehouse cut",() -> WeHouseAPI.cut(options));
             }
 
             if (event.getClickedBlock().getType() == Material.BLACK_WOOL) {
-                WeHouseAPI.paste(player, block.getX(), block.getY(), block.getZ(), 5);
+                WeHousePasteOptions options = new WeHousePasteOptions(player, block, 5);
+                log.withTracker("wehouse paste",() -> WeHouseAPI.paste(options));
             }
         }
     }
