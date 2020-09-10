@@ -1,8 +1,7 @@
 package me.oska.plugins;
 
-import me.oska.minecraft.OskaRPG;
-import me.oska.plugins.hibernate.AbstractRepository;
-import me.oska.plugins.hibernate.exception.RunicException;
+import me.oska.plugins.openjpa.AbstractRepository;
+import me.oska.plugins.openjpa.exception.RunicException;
 import org.bukkit.entity.Player;
 
 import javax.persistence.*;

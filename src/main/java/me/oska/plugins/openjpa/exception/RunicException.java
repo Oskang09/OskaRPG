@@ -1,4 +1,4 @@
-package me.oska.plugins.hibernate.exception;
+package me.oska.plugins.openjpa.exception;
 
 public abstract class RunicException extends Exception {
 

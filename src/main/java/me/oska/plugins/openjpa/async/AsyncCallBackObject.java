@@ -1,4 +1,4 @@
-package me.oska.plugins.hibernate.async;
+package me.oska.plugins.openjpa.async;
 
 @FunctionalInterface
 public interface AsyncCallBackObject<T> {

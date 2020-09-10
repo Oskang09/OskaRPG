@@ -1,6 +1,6 @@
-package me.oska.plugins.hibernate.async;
+package me.oska.plugins.openjpa.async;
 
-import me.oska.plugins.hibernate.exception.RunicException;
+import me.oska.plugins.openjpa.exception.RunicException;
 
 @FunctionalInterface
 public interface AsyncCallBackExceptionHandler {

@@ -82,6 +82,10 @@
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -97,6 +101,12 @@
             <version>7.0.3</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.KotlinFactory</groupId>
+            <artifactId>LightningStorage</artifactId>
+            <version>3.1.9</version>
+        </dependency>
+
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>

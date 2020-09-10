@@ -1,4 +1,4 @@
-package me.oska.plugins.hibernate.async;
+package me.oska.plugins.openjpa.async;
 
 import java.util.List;
 

@@ -1,12 +1,12 @@
-package me.oska.plugins.hibernate;
+package me.oska.plugins.openjpa;
 
-import me.oska.plugins.hibernate.action.FindOrCreateCallback;
-import me.oska.plugins.hibernate.async.AsyncCallBackExceptionHandler;
-import me.oska.plugins.hibernate.async.AsyncCallBackList;
-import me.oska.plugins.hibernate.async.AsyncCallBackObject;
-import me.oska.plugins.hibernate.exception.EntityManagerNotInitializedException;
-import me.oska.plugins.hibernate.exception.EntityNotFoundException;
-import me.oska.plugins.hibernate.exception.RunicException;
+import me.oska.plugins.openjpa.action.FindOrCreateCallback;
+import me.oska.plugins.openjpa.async.AsyncCallBackExceptionHandler;
+import me.oska.plugins.openjpa.async.AsyncCallBackList;
+import me.oska.plugins.openjpa.async.AsyncCallBackObject;
+import me.oska.plugins.openjpa.exception.EntityManagerNotInitializedException;
+import me.oska.plugins.openjpa.exception.EntityNotFoundException;
+import me.oska.plugins.openjpa.exception.RunicException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
