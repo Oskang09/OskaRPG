@@ -1,5 +1,6 @@
 package me.oska.minecraft.listener;
 
+import me.oska.plugins.ORPGPlayer;
 import me.oska.plugins.logger.Logger;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -10,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.projectiles.ProjectileSource;
@@ -21,16 +23,23 @@ public class ORPGListener implements Listener {
     @EventHandler( priority = EventPriority.MONITOR )
     public void onDamage(EntityDamageByEntityEvent event)
     {
+        if (event.getCause() != EntityDamageEvent.DamageCause.CONTACT) {
+            return;
+        }
+
         Entity attacker = event.getDamager();
         Entity victim = event.getEntity();
         if (attacker instanceof Player) {
             if (victim instanceof Player) {
-                log.toConsole("ORPGPlayerDamagePlayerEvent", null);
+                // ORPGPlayerDamagePlayerEvent
+                ORPGPlayer orpg_attacker = ORPGPlayer.getByPlayer((Player) attacker);
+                ORPGPlayer orpg_vicitm = ORPGPlayer.getByPlayer((Player) victim);
+
             } else {
-                log.toConsole("ORPGPlayerDamageEntityEvent", null);
+                // ORPGPlayerDamageEntityEvent
             }
         } else if (victim instanceof Player)  {
-            log.toConsole("ORPGEntityDamagePlayerEvent", null);
+            // ORPGEntityDamagePlayerEvent
         }
     }
 
@@ -42,16 +51,16 @@ public class ORPGListener implements Listener {
         Entity victim = event.getHitEntity();
         if (shooter instanceof Player) {
             if (block != null) {
-                log.toConsole("ORPGPlayerShootBlockEvent", null);
+                // ORPGPlayerShootBlockEvent
             } else if (victim != null) {
                 if (victim instanceof Player) {
-                    log.toConsole("ORPGPlayerShootPlayerEvent", null);
+                    // ORPGPlayerShootPlayerEvent
                 } else if (victim instanceof LivingEntity) {
-                    log.toConsole("ORPGPlayerShootEntityEvent", null);
+                    // ORPGPlayerShootEntityEvent
                 }
             }
         } else if (shooter instanceof LivingEntity && victim instanceof Player) {
-            log.toConsole("ORPGEntityShootPlayerEvent", null);
+            // ORPGEntityShootPlayerEvent
         }
     }
 
@@ -61,7 +70,7 @@ public class ORPGListener implements Listener {
         Entity shooter = event.getEntity();
         if (shooter instanceof Player)
         {
-            log.toConsole("ORPGPlayerShootEvent", null);
+            // ORPGPlayerShootEvent
         }
     }
 }

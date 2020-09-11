@@ -7,6 +7,7 @@
     <persistence-unit name="persistence-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <class>me.oska.plugins.ORPGPlayer</class>
+        <class>me.oska.plugins.ORPGServer</class>
         <properties>
             <property name="openjpa.DynamicEnhancementAgent" value="true"/>
             <property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>

@@ -6,7 +6,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.sound.midi.Track;
 import java.io.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -14,7 +13,7 @@ import java.util.*;
 
 public class Logger {
 
-    private static final String ENVIRONMENT = "development";
+    private static final Object MUTEX = new Object();
     private static final String DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/753560505255460894/x1Px1wNlKslV1TVnEf5fV-AD60Aj8xxfMq7He2A6mSsBEsFJVejmdGF_jV3kPiKfICeL";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private static final TimeZone MALAYSIA_TIMEZONE = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
@@ -27,7 +26,11 @@ public class Logger {
 
         file = new File(OskaRPG.getLoggerFolder(), title + ".log");
         if (!file.exists()) {
-            file.mkdirs();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -35,7 +38,6 @@ public class Logger {
         List<String> messages = new ArrayList(
                 Arrays.asList(
                         "------------- ------------- -------------",
-                        "Environment: " + ENVIRONMENT,
                         "Title: " + title,
                         "Timestamp: " + DATE_FORMAT.format(Calendar.getInstance(MALAYSIA_TIMEZONE).getTime()),
                         "Message: " + message
@@ -61,7 +63,11 @@ public class Logger {
     }
 
     public void toConsole(String message, Exception exception) {
-        new Thread(() -> build(message, exception).forEach(Bukkit.getLogger()::info)).start();
+        new Thread(() -> {
+            synchronized (MUTEX) {
+                build(message, exception).forEach(Bukkit.getLogger()::info);
+            }
+        }).start();
     }
 
     public void toDiscord(String message, Exception exception)  {
@@ -92,9 +98,9 @@ public class Logger {
     public void toFile(String message, Exception exception) {
         new Thread(
                 () -> {
-                    try (FileWriter writer = new FileWriter(file)) {
+                    try (FileWriter writer = new FileWriter(file, true)) {
                         for (String msg : build(message, exception)) {
-                            writer.write(msg + "\n");
+                            writer.append(msg + "\n");
                         }
                         writer.flush();
                     } catch (IOException e) {
