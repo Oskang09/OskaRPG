@@ -14,6 +14,9 @@ public class Stats {
     }
 
     public static String toSQL(Stats stat) {
+        if (stat == null) {
+            stat = new Stats();
+        }
         return OskaRPG.getGson().toJson(stat);
     }
 

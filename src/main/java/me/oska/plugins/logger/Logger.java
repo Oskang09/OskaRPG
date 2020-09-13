@@ -34,6 +34,10 @@ public class Logger {
         }
     }
 
+    private List<String> build(String message) {
+        return build(message,null);
+    }
+
     private List<String> build(String message, Exception exception) {
         List<String> messages = new ArrayList(
                 Arrays.asList(
@@ -62,12 +66,20 @@ public class Logger {
         }
     }
 
+    public void toConsole(String message) {
+        toConsole(message, null);
+    }
+
     public void toConsole(String message, Exception exception) {
         new Thread(() -> {
             synchronized (MUTEX) {
                 build(message, exception).forEach(Bukkit.getLogger()::info);
             }
         }).start();
+    }
+
+    public void toDiscord(String message)  {
+        toDiscord(message, null);
     }
 
     public void toDiscord(String message, Exception exception)  {
@@ -93,6 +105,10 @@ public class Logger {
                     }
                 }
         ).start();
+    }
+
+    public void toFile(String message) {
+        toFile(message, null);
     }
 
     public void toFile(String message, Exception exception) {

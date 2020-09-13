@@ -1,0 +1,41 @@
+package me.oska.plugins.inventory;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class InventoryListener implements Listener {
+
+    private static Map<Inventory, CustomInventory> inventories;
+    private static boolean registered;
+    public static void registerTo(JavaPlugin plugin) {
+        registered = true;
+        inventories = new HashMap<>();
+
+        plugin.getServer().getPluginManager().registerEvents(new InventoryListener(), plugin);
+    }
+
+    protected static boolean isRegistered() {
+        return registered;
+    }
+
+    private InventoryListener() {}
+
+
+    @EventHandler
+    public void onClick(InventoryInteractEvent event) {
+
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+
+    }
+
+}

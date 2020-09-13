@@ -12,6 +12,8 @@ import org.apache.openjpa.persistence.Persistent;
 import org.bukkit.entity.Player;
 
 import javax.persistence.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +44,20 @@ public class ORPGPlayer {
     @Transient
     private Player player;
 
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
+    @Transient
     private List<ORPGSkill> skills;
+    @Transient
+    private Stats strength;
+    @Transient
+    private Stats dexterity;
+    @Transient
+    private Stats accuracy;
+    @Transient
+    private Stats range;
+    @Transient
+    private Stats damage;
+    @Transient
+    private Stats health;
 
     @Id
     private String uuid;
@@ -56,37 +68,11 @@ public class ORPGPlayer {
     @Enumerated(EnumType.ORDINAL)
     private GraphicLevel graphic;
 
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats strength;
+    protected ORPGPlayer() {}
 
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats dexterity;
-
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats accuracy;
-
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats range;
-
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats damage;
-
-    @Persistent
-    @Externalizer("toSQL")
-    @Factory("fromSQL")
-    private Stats health;
-
-    private ORPGPlayer() {}
+    public void addSkill(ORPGSkill skill) {
+        this.skills.add(skill);
+    }
 
     public static ORPGPlayer load(Player player) {
         ORPGPlayer instance = null;
@@ -105,6 +91,7 @@ public class ORPGPlayer {
 
             instance.name = player.getName();
             instance.player = player;
+            instance.skills = new ArrayList();
             repository.edit(instance);
         } catch (RunicException e) {
             e.printStackTrace();

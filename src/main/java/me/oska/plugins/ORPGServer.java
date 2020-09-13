@@ -15,6 +15,8 @@ public class ORPGServer {
     @Id
     private String id;
 
+    protected ORPGServer() {}
+
     public static ORPGServer loadServer(String id) {
         ORPGServer instance = null;
         try {

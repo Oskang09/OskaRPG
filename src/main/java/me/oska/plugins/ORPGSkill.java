@@ -3,7 +3,7 @@ package me.oska.plugins;
 import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.orpg.Skill;
-import me.oska.plugins.orpg.Stats;
+import org.postgresql.PGNotification;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,31 +15,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Entity
 @Table
 public class ORPGSkill {
     private static Map<String, ORPGSkill> skills = new HashMap<>();
     private static AbstractRepository<ORPGSkill> repository = new AbstractRepository<>(ORPGSkill.class);
-
-    public static String toSQL(List<ORPGSkill> skill) {
-        return skill.stream().map(x -> x.id).collect(Collectors.joining(","));
-    }
-
-    public static List<ORPGSkill> fromSQL(String sqlArray) {
-        List<ORPGSkill> instance = new ArrayList<>();
-        if (sqlArray != null) {
-            for (String skillId : sqlArray.split(",")) {
-                instance.add(skills.get(skillId));
-            }
-        }
-        return instance;
-    }
 
     @Id
     private String id;

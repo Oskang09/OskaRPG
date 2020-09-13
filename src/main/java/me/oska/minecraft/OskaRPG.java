@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import me.oska.minecraft.listener.ORPGListener;
 import me.oska.minecraft.listener.PlayerListener;
 import me.oska.minecraft.listener.TestListener;
-import me.oska.plugins.ORPGSkill;
+import me.oska.plugins.inventory.InventoryListener;
+import me.oska.plugins.logger.Logger;
+import me.oska.plugins.openjpa.AbstractRepository;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.sql.SQLException;
 
 public final class OskaRPG extends JavaPlugin {
 
@@ -60,10 +63,22 @@ public final class OskaRPG extends JavaPlugin {
             getDataFolder().mkdirs();
         }
 
+        InventoryListener.registerTo(this);
         PluginManager manager = getServer().getPluginManager();
         manager.registerEvents(new TestListener(), this);
         manager.registerEvents(new PlayerListener(), this);
         manager.registerEvents(new ORPGListener(), this);
+
+        Logger log = new Logger("test realtime");
+        try {
+            AbstractRepository.listen("test", 3000, (notification) -> {
+                log.toConsole("PID: " + notification.getPID(), null);
+                log.toConsole("Channel: " + notification.getName(), null);
+                log.toConsole("Parameter: " + notification.getParameter(), null);
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
