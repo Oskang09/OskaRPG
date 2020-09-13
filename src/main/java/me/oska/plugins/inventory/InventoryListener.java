@@ -25,6 +25,14 @@ public class InventoryListener implements Listener {
         return registered;
     }
 
+    protected static void addInventory(CustomInventory inv) {
+        inventories.put(inv.getInventory(), inv);
+    }
+
+    protected static void removeInventory(CustomInventory inv) {
+        inventories.remove(inv.getInventory());
+    }
+
     private InventoryListener() {}
 
 

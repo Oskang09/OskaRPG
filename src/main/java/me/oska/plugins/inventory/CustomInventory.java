@@ -25,7 +25,8 @@ public abstract class CustomInventory<T extends InventoryState> {
 
     public void open(Player player) {
         render(this.state);
-        player.openInventory(getInventory());
+        InventoryListener.addInventory(this);
+        player.openInventory(inventory);
     }
 
     protected void option(InventoryOptions option) {
