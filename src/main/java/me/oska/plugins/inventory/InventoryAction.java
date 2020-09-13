@@ -1,7 +1,7 @@
 package me.oska.plugins.inventory;
 
 public enum InventoryAction {
-    NEXT,
     PREVIOUS,
+    NEXT,
     NONE
-}
+};

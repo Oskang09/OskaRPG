@@ -7,9 +7,6 @@ public class InventoryOptions {
 
     @Getter
     @Setter
-    private boolean isStatic;
+    private boolean isClosable;
 
-    @Getter
-    @Setter
-    private boolean isLoaded;
 }

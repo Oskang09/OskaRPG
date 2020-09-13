@@ -1,5 +1,7 @@
 package me.oska.plugins.inventory;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -9,29 +11,25 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class CustomInventory {
+public abstract class CustomInventory<T extends InventoryState> {
 
+    @Getter
     private Inventory inventory;
-    private InventoryOptions options;
+    private InventoryOptions option;
     private Map<Integer, Runnable> actions;
 
-    public abstract void load();
+    @Getter
+    private T state;
+
+    public abstract void render(T state);
 
     public void open(Player player) {
-        if (this.options.isStatic() && !this.options.isLoaded()) {
-            load();
-            this.options.setLoaded(true);
-        }
-
+        render(this.state);
         player.openInventory(getInventory());
     }
 
-    public Inventory getInventory() {
-        return inventory;
-    }
-
-    protected void option(InventoryOptions options) {
-        this.options = options;
+    protected void option(InventoryOptions option) {
+        this.option = option;
     }
 
     protected void set(int index, ItemStack item) {
@@ -56,6 +54,35 @@ public abstract class CustomInventory {
                 this.actions.put(i, action);
             }
         }
+    }
+
+    protected void setState(T state) {
+        this.state = state;
+        this.render(this.state);
+    }
+
+    private Runnable getPresetAction(InventoryAction action) {
+        if (action == InventoryAction.NONE) {
+            return null;
+        }
+
+        if (action == InventoryAction.NEXT && this.state.hasNext()) {
+            return null;
+        }
+
+        if (action == InventoryAction.PREVIOUS && this.state.hasPrevious()) {
+            return null;
+        }
+
+        return () -> {
+            this.inventory.clear();
+            if (action == InventoryAction.NEXT) {
+                this.state.nextPage();
+            } else if (action == InventoryAction.PREVIOUS) {
+                this.state.previousPage();
+            }
+            this.render(this.state);
+        };
     }
 
     public CustomInventory(InventoryType type, String title) {
