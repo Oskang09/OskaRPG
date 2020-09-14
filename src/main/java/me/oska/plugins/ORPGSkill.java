@@ -3,10 +3,12 @@ package me.oska.plugins;
 import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.orpg.Skill;
+import org.joor.Reflect;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.tools.SimpleJavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
@@ -37,7 +39,7 @@ public class ORPGSkill {
     private void loadSkill() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException, IOException {
         File file = new File(OskaRPG.getSkillFolder(),fileName +".class");
         if (!file.exists()) {
-            throw new ClassNotFoundException("Skill '" + fileName + "' not found in skills directory.");
+            throw new ClassNotFoundException("Skill '" + fileName + "' not found in skills directory");
         }
 
         URL url = new URL("file:" + file.getPath());
@@ -45,7 +47,7 @@ public class ORPGSkill {
         try (URLClassLoader loader = URLClassLoader.newInstance(urls, OskaRPG.getInstance().getClass().getClassLoader())) {
             Class clazz = loader.loadClass(packageName);
             if (!Skill.class.isAssignableFrom(clazz)){
-                throw new InvalidClassException("Skill '" + fileName + "' doesn't extend me.oska.plugins.orpg.Skill.");
+                throw new InvalidClassException("Skill '" + fileName + "' doesn't extend me.oska.plugins.orpg.Skill");
             }
             Class<Skill> sc = clazz.asSubclass(Skill.class);
             Constructor<Skill> cst = sc.getConstructor();
