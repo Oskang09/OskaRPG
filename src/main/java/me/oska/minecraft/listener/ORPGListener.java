@@ -48,7 +48,6 @@ public class ORPGListener implements Listener {
                 orpg_attacker.getTriggerSkills(SkillType.PLAYER_DAMAGE_PLAYER)
                         .forEach((x) -> x.playerDamagePlayer(event, orpg_attacker, orpg_vicitm));
             } else {
-                log.toConsole("is working", null);
                 // ORPGPlayerDamageEntityEvent
                 orpg_attacker.getTriggerSkills(SkillType.PLAYER_DAMAGE_ENTITY)
                         .forEach((x) -> x.playerDamageEntity(event, orpg_attacker, (LivingEntity) victim));

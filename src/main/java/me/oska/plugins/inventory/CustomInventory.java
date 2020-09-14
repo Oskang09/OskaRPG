@@ -1,7 +1,6 @@
 package me.oska.plugins.inventory;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -11,30 +10,39 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class CustomInventory<T extends InventoryState> {
+public abstract class CustomInventory<T> {
 
     @Getter
     private Inventory inventory;
-    private InventoryOptions option;
+    @Getter
+    private InventoryOptions options;
     private Map<Integer, Runnable> actions;
 
     @Getter
-    private T state;
+    protected T state;
 
-    public abstract void render(T state);
+    protected abstract void render();
+    protected abstract T initialState();
 
-    public void open(Player player) {
-        render(this.state);
+    public void openInventory(Player player) {
+        this.state = this.initialState();
+        this.render();
+
         InventoryListener.addInventory(this);
-        player.openInventory(inventory);
+        player.openInventory(this.inventory);
     }
 
-    protected void option(InventoryOptions option) {
-        this.option = option;
+    protected void setState(T state) {
+        this.state = state;
+        this.render();
+    }
+
+    protected void option(InventoryOptions options) {
+        this.options = options;
     }
 
     protected void set(int index, ItemStack item) {
-        set(index, item, null);
+        this.set(index, item, null);
     }
 
     protected void set(int index, ItemStack item, Runnable action) {
@@ -45,7 +53,7 @@ public abstract class CustomInventory<T extends InventoryState> {
     }
 
     protected void set(int[] index, ItemStack item) {
-        set(index, item, null);
+        this.set(index, item, null);
     }
 
     protected void set(int[] index, ItemStack item, Runnable action) {
@@ -57,48 +65,19 @@ public abstract class CustomInventory<T extends InventoryState> {
         }
     }
 
-    protected void setState(T state) {
-        this.state = state;
-        this.render(this.state);
-    }
-
-    private Runnable getPresetAction(InventoryAction action) {
-        if (action == InventoryAction.NONE) {
-            return null;
-        }
-
-        if (action == InventoryAction.NEXT && this.state.hasNext()) {
-            return null;
-        }
-
-        if (action == InventoryAction.PREVIOUS && this.state.hasPrevious()) {
-            return null;
-        }
-
-        return () -> {
-            this.inventory.clear();
-            if (action == InventoryAction.NEXT) {
-                this.state.nextPage();
-            } else if (action == InventoryAction.PREVIOUS) {
-                this.state.previousPage();
-            }
-            this.render(this.state);
-        };
-    }
-
     public CustomInventory(InventoryType type, String title) {
         super();
-        inventory = Bukkit.createInventory(null, type, title);
+        this.inventory = Bukkit.createInventory(null, type, title);
     }
 
     public CustomInventory(InventoryType type) {
         super();
-        inventory = Bukkit.createInventory(null, type);
+        this.inventory = Bukkit.createInventory(null, type);
     }
 
     public CustomInventory(String title, int size) {
         super();
-        inventory = Bukkit.createInventory(null, size, title);
+        this.inventory = Bukkit.createInventory(null, size, title);
     }
 
     private CustomInventory() {

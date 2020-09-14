@@ -1,6 +1,7 @@
 package me.oska.plugins.inventory;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
@@ -36,14 +37,19 @@ public class InventoryListener implements Listener {
     private InventoryListener() {}
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onClick(InventoryInteractEvent event) {
-
+        if (!inventories.containsKey(event.getInventory())) {
+            return;
+        }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onClose(InventoryCloseEvent event) {
-
+        if (!inventories.containsKey(event.getInventory())) {
+            return;
+        }
+        inventories.remove(event.getInventory());
     }
 
 }

@@ -6,11 +6,8 @@ import me.oska.minecraft.listener.PlayerListener;
 import me.oska.minecraft.listener.TestListener;
 import me.oska.plugins.inventory.CustomInventory;
 import me.oska.plugins.inventory.InventoryListener;
-import me.oska.plugins.inventory.InventoryState;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.openjpa.AbstractRepository;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
