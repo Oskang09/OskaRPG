@@ -8,20 +8,11 @@ import me.oska.plugins.openjpa.async.AsyncCallBackObject;
 import me.oska.plugins.openjpa.exception.EntityManagerNotInitializedException;
 import me.oska.plugins.openjpa.exception.EntityNotFoundException;
 import me.oska.plugins.openjpa.exception.RunicException;
-import org.apache.openjpa.conf.OpenJPAConfiguration;
-import org.apache.openjpa.jdbc.kernel.JDBCStoreManager;
-import org.apache.openjpa.jdbc.sql.PostgresDictionary;
-import org.apache.openjpa.persistence.*;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 
-import javax.jms.Session;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.swing.plaf.nimbus.State;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -30,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class AbstractRepository<T> {
     private static Logger log = new Logger("AbstractRepository");
@@ -66,6 +56,14 @@ public class AbstractRepository<T> {
         Thread thread = new Thread(action);
         thread.start();
         return () -> thread.interrupt();
+    }
+
+    public static void setupRepository() {
+        new AbstractRepository();
+    }
+
+    private AbstractRepository() {
+        setupEntityManagerFactory();
     }
 
     public AbstractRepository(Class<T> entityClass) {
@@ -208,6 +206,61 @@ public class AbstractRepository<T> {
         }).start();
     }
 
+    public void namedQuerySingleAsync(String queryName, AsyncCallBackObject<T> asyncCallBackObject, AsyncCallBackExceptionHandler asyncCallBackExceptionHandler,Object... arguments) {
+        new Thread(() -> {
+            try {
+                asyncCallBackObject.done(namedQuerySingle(queryName, arguments));
+            } catch (RunicException e) {
+                asyncCallBackExceptionHandler.error(e);
+            }
+        }).start();
+    }
+
+    public synchronized T namedQuerySingle(String queryName, Object... arguments) throws RunicException {
+        EntityManager entityManager = getEntityManager();
+        EntityTransaction entityTransaction = entityManager.getTransaction();
+        entityTransaction.begin();
+
+        TypedQuery<T> query = entityManager.createNamedQuery(queryName, entityClass);
+        for (int i = 1; i <= arguments.length; i++ ) {
+            query.setParameter(i, arguments[i-1]);
+        }
+        T result = query.getSingleResult();
+        if (result == null) {
+            throw new EntityNotFoundException(getClass());
+        }
+
+        entityTransaction.commit();
+        entityManager.close();
+        return result;
+    }
+
+    public void namedQueryListAsync(String queryName, AsyncCallBackList<T> asyncCallBackObject, AsyncCallBackExceptionHandler asyncCallBackExceptionHandler,Object... arguments) {
+        new Thread(() -> {
+            try {
+                asyncCallBackObject.done(namedQueryList(queryName, arguments));
+            }catch (RunicException e) {
+                asyncCallBackExceptionHandler.error(e);
+            }
+        }).start();
+    }
+
+    public synchronized List<T> namedQueryList(String queryName, Object... arguments) throws RunicException {
+        EntityManager entityManager = getEntityManager();
+        EntityTransaction entityTransaction = entityManager.getTransaction();
+        entityTransaction.begin();
+
+        TypedQuery<T> query = entityManager.createNamedQuery(queryName, entityClass);
+        for (int i = 1; i <= arguments.length; i++ ) {
+            query.setParameter(i, arguments[i-1]);
+        }
+        List<T> lists = query.getResultList();
+
+        entityTransaction.commit();
+        entityManager.close();
+        return lists;
+    }
+
     protected EntityManager getEntityManager() throws RunicException {
         setupEntityManagerFactory();
         if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
@@ -216,7 +269,6 @@ public class AbstractRepository<T> {
             throw new EntityManagerNotInitializedException();
         }
     }
-
 
     private void setupEntityManagerFactory() {
         if (entityManagerFactory == null || !entityManagerFactory.isOpen()) {

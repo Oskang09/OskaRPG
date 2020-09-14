@@ -1,10 +1,8 @@
 package me.oska.plugins.orpg;
 
-import lombok.Getter;
 import me.oska.plugins.ORPGPlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;

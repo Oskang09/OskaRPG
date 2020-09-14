@@ -3,7 +3,6 @@ package me.oska.plugins;
 import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.orpg.Skill;
-import org.postgresql.PGNotification;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

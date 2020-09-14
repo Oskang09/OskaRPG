@@ -2,10 +2,9 @@ package me.oska.plugins;
 
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.openjpa.exception.RunicException;
+import me.oska.plugins.orpg.ServerStatus;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table
@@ -14,6 +13,9 @@ public class ORPGServer {
 
     @Id
     private String id;
+
+    @Enumerated(EnumType.STRING)
+    private ServerStatus status;
 
     protected ORPGServer() {}
 

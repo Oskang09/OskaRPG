@@ -6,11 +6,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class CustomInventory<T> {
+public abstract class InventoryUI<T> {
+
+    public static void register(JavaPlugin plugin) {
+        InventoryListener.register(plugin);
+    }
 
     @Getter
     private Inventory inventory;
@@ -65,22 +70,29 @@ public abstract class CustomInventory<T> {
         }
     }
 
-    public CustomInventory(InventoryType type, String title) {
+    protected void click(int index) {
+        Runnable action = this.actions.getOrDefault(index, null);
+        if (action != null) {
+            action.run();
+        }
+    }
+
+    public InventoryUI(InventoryType type, String title) {
         super();
         this.inventory = Bukkit.createInventory(null, type, title);
     }
 
-    public CustomInventory(InventoryType type) {
+    public InventoryUI(InventoryType type) {
         super();
         this.inventory = Bukkit.createInventory(null, type);
     }
 
-    public CustomInventory(String title, int size) {
+    public InventoryUI(String title, int size) {
         super();
         this.inventory = Bukkit.createInventory(null, size, title);
     }
 
-    private CustomInventory() {
+    private InventoryUI() {
         if (!InventoryListener.isRegistered()) {
             throw new IllegalStateException("Disabling CustomInventory because InventoryListener hasn't registered.");
         }

@@ -34,14 +34,15 @@ public class Logger {
         }
     }
 
-    private List<String> build(String message) {
-        return build(message,null);
+    private String trackId() {
+        return UUID.randomUUID().toString();
     }
 
-    private List<String> build(String message, Exception exception) {
+    private List<String> build(String trackId, String message, Exception exception) {
         List<String> messages = new ArrayList(
                 Arrays.asList(
                         "------------- ------------- -------------",
+                        "Track ID : " + trackId,
                         "Title: " + title,
                         "Timestamp: " + DATE_FORMAT.format(Calendar.getInstance(MALAYSIA_TIMEZONE).getTime()),
                         "Message: " + message
@@ -60,29 +61,49 @@ public class Logger {
         try {
             runnable.track();
         } catch (Exception e) {
-            toConsole(message, e);
-            toDiscord(message, e);
-            toFile(message, e);
+            final String id = trackId();
+            toConsole(id, message, e);
+            toDiscord(id, message, e);
+            toFile(id, message, e);
         }
     }
 
-    public void toConsole(String message) {
-        toConsole(message, null);
+    public String toConsole(String message) {
+        return toConsole(null, message, null);
     }
 
-    public void toConsole(String message, Exception exception) {
+    public String toConsole(String message, Exception exception) {
+        return toConsole(null, message, exception);
+    }
+
+    public String toConsole(String id, String message, Exception exception) {
+        if (id == null) {
+            id = trackId();
+        }
+        String finalId = id;
+
         new Thread(() -> {
             synchronized (MUTEX) {
-                build(message, exception).forEach(Bukkit.getLogger()::info);
+                build(finalId, message, exception).forEach(Bukkit.getLogger()::info);
             }
         }).start();
+        return id;
     }
 
-    public void toDiscord(String message)  {
-        toDiscord(message, null);
+    public String toDiscord(String message)  {
+        return toDiscord(null, message, null);
     }
 
-    public void toDiscord(String message, Exception exception)  {
+    public String toDiscord(String message, Exception e)  {
+        return toDiscord(null, message, e);
+    }
+
+    public String toDiscord(String id, String message, Exception exception)  {
+        if (id == null) {
+            id = trackId();
+        }
+        String finalId = id;
+
         new Thread(
                 ()->{
                     try {
@@ -94,7 +115,7 @@ public class Logger {
                         connection.setDoOutput(true);
 
                         JsonObject json = new JsonObject();
-                        json.addProperty("content", String.join("\n", build(message, exception)));
+                        json.addProperty("content", String.join("\n", build(finalId, message, exception)));
                         OutputStream stream = connection.getOutputStream();
                         stream.write(json.toString().getBytes());
                         stream.close();
@@ -105,17 +126,27 @@ public class Logger {
                     }
                 }
         ).start();
+        return id;
     }
 
-    public void toFile(String message) {
-        toFile(message, null);
+    public String toFile(String message) {
+        return toFile(null, message, null);
     }
 
-    public void toFile(String message, Exception exception) {
+    public String toFile(String message, Exception e) {
+        return toFile(null, message, e);
+    }
+
+    public String toFile(String id, String message, Exception exception) {
+        if (id == null) {
+            id = trackId();
+        }
+        String finalId = id;
+
         new Thread(
                 () -> {
                     try (FileWriter writer = new FileWriter(file, true)) {
-                        for (String msg : build(message, exception)) {
+                        for (String msg : build(finalId, message, exception)) {
                             writer.append(msg + "\n");
                         }
                         writer.flush();
@@ -124,6 +155,6 @@ public class Logger {
                     }
                 }
         ).start();
+        return id;
     }
-
 }

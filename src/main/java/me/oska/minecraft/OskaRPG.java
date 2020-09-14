@@ -4,11 +4,19 @@ import com.google.gson.Gson;
 import me.oska.minecraft.listener.ORPGListener;
 import me.oska.minecraft.listener.PlayerListener;
 import me.oska.minecraft.listener.TestListener;
-import me.oska.plugins.inventory.CustomInventory;
-import me.oska.plugins.inventory.InventoryListener;
+import me.oska.plugins.inventory.InventoryUI;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.openjpa.AbstractRepository;
+import me.oska.plugins.vault.ORPGChat;
+import me.oska.plugins.vault.ORPGEconomy;
+import me.oska.plugins.vault.ORPGPermission;
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -64,7 +72,15 @@ public final class OskaRPG extends JavaPlugin {
             getDataFolder().mkdirs();
         }
 
-        InventoryListener.registerTo(this);
+        ServicesManager service = getServer().getServicesManager();
+        ORPGPermission orpgPermission = new ORPGPermission();
+        service.register(Permission.class, orpgPermission, this, ServicePriority.Highest);
+        service.register(Economy.class, new ORPGEconomy(), this, ServicePriority.Highest);
+        service.register(Chat.class, new ORPGChat(orpgPermission), this, ServicePriority.Highest);
+
+        InventoryUI.register(this);
+        AbstractRepository.setupRepository();
+
         PluginManager manager = getServer().getPluginManager();
         manager.registerEvents(new TestListener(), this);
         manager.registerEvents(new PlayerListener(), this);
@@ -73,9 +89,9 @@ public final class OskaRPG extends JavaPlugin {
         Logger log = new Logger("test realtime");
         try {
             AbstractRepository.listen("test", 3000, (notification) -> {
-                log.toConsole("PID: " + notification.getPID(), null);
-                log.toConsole("Channel: " + notification.getName(), null);
-                log.toConsole("Parameter: " + notification.getParameter(), null);
+                log.toConsole("PID: " + notification.getPID());
+                log.toConsole("Channel: " + notification.getName());
+                log.toConsole("Parameter: " + notification.getParameter());
             });
         } catch (SQLException e) {
             e.printStackTrace();
