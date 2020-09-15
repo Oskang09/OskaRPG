@@ -3,12 +3,10 @@ package me.oska.plugins;
 import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.openjpa.AbstractRepository;
 import me.oska.plugins.orpg.Skill;
-import org.joor.Reflect;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.tools.SimpleJavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;

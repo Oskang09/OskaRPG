@@ -19,7 +19,7 @@ public class ORPGPermission extends Permission {
 
     @Override
     public boolean hasSuperPermsCompat() {
-        return false;
+        return true;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ORPGPermission extends Permission {
         Player player = Bukkit.getPlayer(playerName);
         ORPGPlayer orpgPlayer = ORPGPlayer.getByPlayer(player);
         orpgPlayer.addPermission(permission);
-        return true;
+        return playerAddTransient(player, permission);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ORPGPermission extends Permission {
         Player player = Bukkit.getPlayer(playerName);
         ORPGPlayer orpgPlayer = ORPGPlayer.getByPlayer(player);
         orpgPlayer.removePermission(permission);
-        return true;
+        return playerRemoveTransient(player, permission);
     }
 
     @Override
