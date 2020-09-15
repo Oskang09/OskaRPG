@@ -10,8 +10,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public abstract class InventoryUI<T> {
+public abstract class InventoryUI<T> implements Cloneable {
 
     public static void register(JavaPlugin plugin) {
         InventoryListener.register(plugin);
@@ -19,22 +21,19 @@ public abstract class InventoryUI<T> {
 
     @Getter
     private Inventory inventory;
-    @Getter
-    private InventoryOptions options;
-    private Map<Integer, Runnable> actions;
+
+    private Map<Integer, Consumer<Player>> actions;
 
     @Getter
     protected T state;
 
-    protected abstract void render();
+    protected abstract boolean closableByEvent();
     protected abstract T initialState();
+    protected abstract void render();
+    protected abstract void disposeState();
 
-    public void openInventory(Player player) {
-        this.state = this.initialState();
-        this.render();
-
-        InventoryListener.addInventory(this);
-        player.openInventory(this.inventory);
+    protected void setState(Function<T, T> update) {
+        setState(update.apply(this.state));
     }
 
     protected void setState(T state) {
@@ -42,15 +41,11 @@ public abstract class InventoryUI<T> {
         this.render();
     }
 
-    protected void option(InventoryOptions options) {
-        this.options = options;
-    }
-
     protected void set(int index, ItemStack item) {
         this.set(index, item, null);
     }
 
-    protected void set(int index, ItemStack item, Runnable action) {
+    protected void set(int index, ItemStack item, Consumer<Player> action) {
         this.inventory.setItem(index, item);
         if (action != null) {
             this.actions.put(index, action);
@@ -61,7 +56,7 @@ public abstract class InventoryUI<T> {
         this.set(index, item, null);
     }
 
-    protected void set(int[] index, ItemStack item, Runnable action) {
+    protected void set(int[] index, ItemStack item, Consumer<Player> action) {
         for ( int i = 0; i < index.length; i++) {
             this.inventory.setItem(i, item);
             if (action != null) {
@@ -70,10 +65,18 @@ public abstract class InventoryUI<T> {
         }
     }
 
-    protected void click(int index) {
-        Runnable action = this.actions.getOrDefault(index, null);
+    protected void goTo(Player player, InventoryUI inventoryUI) {
+        InventoryListener.goTo(player, inventoryUI);
+    }
+
+    protected void goBack(Player player) {
+        InventoryListener.goBack(player);
+    }
+
+    void click(Player player, int index) {
+        Consumer<Player> action = this.actions.getOrDefault(index, null);
         if (action != null) {
-            action.run();
+            action.accept(player);
         }
     }
 
@@ -94,8 +97,18 @@ public abstract class InventoryUI<T> {
 
     private InventoryUI() {
         if (!InventoryListener.isRegistered()) {
-            throw new IllegalStateException("Disabling CustomInventory because InventoryListener hasn't registered.");
+            throw new IllegalStateException("Disabling InventoryUI because InventoryListener hasn't registered.");
         }
         this.actions = new HashMap<>();
+    }
+
+    @Override
+    protected Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

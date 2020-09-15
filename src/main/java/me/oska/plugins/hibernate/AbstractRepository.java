@@ -1,13 +1,13 @@
-package me.oska.plugins.openjpa;
+package me.oska.plugins.hibernate;
 
 import me.oska.plugins.logger.Logger;
-import me.oska.plugins.openjpa.action.FindOrCreateCallback;
-import me.oska.plugins.openjpa.async.AsyncCallBackExceptionHandler;
-import me.oska.plugins.openjpa.async.AsyncCallBackList;
-import me.oska.plugins.openjpa.async.AsyncCallBackObject;
-import me.oska.plugins.openjpa.exception.EntityManagerNotInitializedException;
-import me.oska.plugins.openjpa.exception.EntityNotFoundException;
-import me.oska.plugins.openjpa.exception.RunicException;
+import me.oska.plugins.hibernate.action.FindOrCreateCallback;
+import me.oska.plugins.hibernate.async.AsyncCallBackExceptionHandler;
+import me.oska.plugins.hibernate.async.AsyncCallBackList;
+import me.oska.plugins.hibernate.async.AsyncCallBackObject;
+import me.oska.plugins.hibernate.exception.EntityManagerNotInitializedException;
+import me.oska.plugins.hibernate.exception.EntityNotFoundException;
+import me.oska.plugins.hibernate.exception.RunicException;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 
@@ -49,7 +49,12 @@ public class AbstractRepository<T> {
                 Statement read = connection.createStatement();
                 read.execute("SELECT 1");
                 read.close();
-                Arrays.stream(postgres.getNotifications()).forEach(consumer);
+
+                PGNotification[] notifications = postgres.getNotifications();
+                if (notifications!= null) {
+                    Arrays.stream(postgres.getNotifications()).forEach(consumer);
+                }
+
                 Thread.sleep(intervalInMilli);
             }
         });
@@ -273,15 +278,14 @@ public class AbstractRepository<T> {
     private void setupEntityManagerFactory() {
         if (entityManagerFactory == null || !entityManagerFactory.isOpen()) {
             Properties properties = new Properties();
-            properties.put("openjpa.ConnectionDriverName", "org.postgresql.Driver");
-            properties.put("openjpa.ConnectionURL", getConnectionString());
-            properties.put("openjpa.ConnectionUserName", DATABASE_USERNAME);
-            properties.put("openjpa.ConnectionPassword", DATABASE_PASSWORD);
-            properties.put("openjpa.DynamicEnhancementAgent", true);
-            properties.put("openjpa.RuntimeUnenhancedClasses", "supported");
-            properties.put("openjpa.Log", "SQL=TRACE");
-            properties.put("openjpa.ConnectionFactoryProperties", "PrintParameters=true");
-            properties.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
+            properties.put("hibernate.connection.driver_class", "org.postgresql.Driver");
+            properties.put("hibernate.connection.url", getConnectionString());
+            properties.put("hibernate.connection.username", DATABASE_USERNAME);
+            properties.put("hibernate.connection.password", DATABASE_PASSWORD);
+            properties.put("hibernate.dialect", "me.oska.plugins.hibernate.PostgresDialect");
+            properties.put("hibernate.show_sql", true);
+            properties.put("hibernate.format_sql", true);
+            properties.put("hibernate.hbm2ddl.auto", "create");
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             entityManagerFactory = Persistence.createEntityManagerFactory("persistence-unit", properties);
         }

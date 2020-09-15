@@ -1,4 +1,4 @@
-package me.oska.plugins.openjpa.action;
+package me.oska.plugins.hibernate.action;
 
 @FunctionalInterface
 public interface FindOrCreateCallback<T> {

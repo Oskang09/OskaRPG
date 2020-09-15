@@ -5,9 +5,7 @@
                     http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
              version="2.1">
     <persistence-unit name="persistence-unit" transaction-type="RESOURCE_LOCAL">
-        <class>me.oska.plugins.ORPGPlayer</class>
-        <class>me.oska.plugins.ORPGSkill</class>
-        <class>me.oska.plugins.ORPGServer</class>
-        <class>me.oska.plugins.ORPGItem</class>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
     </persistence-unit>
 </persistence>

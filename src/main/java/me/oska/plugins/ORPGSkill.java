@@ -1,12 +1,13 @@
 package me.oska.plugins;
 
 import me.oska.minecraft.OskaRPG;
-import me.oska.plugins.openjpa.AbstractRepository;
+import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.orpg.Skill;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
@@ -19,16 +20,18 @@ import java.util.Map;
 
 @Entity
 @Table
-public class ORPGSkill {
+public class ORPGSkill extends BaseEntity {
     private static Map<String, ORPGSkill> skills = new HashMap<>();
     private static AbstractRepository<ORPGSkill> repository = new AbstractRepository<>(ORPGSkill.class);
 
     @Id
     private String id;
-    private Skill skill;
     private String display;
     private String fileName;    // TestSkill.class ( bytecode )
     private String packageName; // me.oska.extension.TestSkill
+
+    @Transient
+    private Skill skill;
 
     public Skill getSkill() {
         return skill;

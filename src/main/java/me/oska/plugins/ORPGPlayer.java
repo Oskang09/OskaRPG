@@ -1,14 +1,16 @@
 package me.oska.plugins;
 
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import lombok.Getter;
-import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.logger.Logger;
-import me.oska.plugins.openjpa.AbstractRepository;
-import me.oska.plugins.openjpa.exception.RunicException;
+import me.oska.plugins.hibernate.AbstractRepository;
+import me.oska.plugins.hibernate.exception.RunicException;
 import me.oska.plugins.orpg.*;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachment;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.*;
@@ -24,7 +26,7 @@ import java.util.stream.Stream;
 //        resultClass = ORPGPlayer.class
 //    )
 //})
-public class ORPGPlayer {
+public class ORPGPlayer extends BaseEntity {
     private static final int BASE_XP = 700;
     private static final Logger log = new Logger("ORPG - Player");
     private static final Map<String, ORPGPlayer> players = new HashMap<>();
@@ -86,16 +88,19 @@ public class ORPGPlayer {
     @Getter
     private double xp;
 
-    @ElementCollection
-    private HashSet<String> permissions;
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private Set<String> permissions;
 
     @Getter
+    @Column(columnDefinition = "VARCHAR(6) default 'LOW'")
     @Enumerated(EnumType.STRING)
-    private GraphicLevel graphic;
+    private GraphicLevel graphic = GraphicLevel.LOW;
 
     @Getter
+    @Column(columnDefinition = "VARCHAR(8) default 'VERIFIED'")
     @Enumerated(EnumType.STRING)
-    private PlayerStatus status;
+    private PlayerStatus status = PlayerStatus.VERIFIED;
 
     @Getter
     private int balance;
@@ -110,7 +115,6 @@ public class ORPGPlayer {
                     () -> { 
                         ORPGPlayer entity = new ORPGPlayer();
                         entity.uuid = player.getUniqueId().toString();
-                        entity.graphic = GraphicLevel.LOW;
                         entity.level = 1;
                         entity.xp = 0;
                         entity.balance = 0;

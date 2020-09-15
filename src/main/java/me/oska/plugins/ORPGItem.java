@@ -2,19 +2,21 @@ package me.oska.plugins;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.oska.plugins.openjpa.AbstractRepository;
-import me.oska.plugins.openjpa.converter.ItemConverter;
+import me.oska.plugins.hibernate.AbstractRepository;
+import me.oska.plugins.hibernate.converter.ItemConverter;
 import org.bukkit.inventory.ItemStack;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Table
-public class ORPGItem {
+public class ORPGItem extends BaseEntity {
     private static AbstractRepository<ORPGItem> repository = new AbstractRepository(ORPGItem.class);
 
     @Getter
+    @Column(columnDefinition = "jsonb")
     @Convert(converter = ItemConverter.class)
     private ItemStack item;
 

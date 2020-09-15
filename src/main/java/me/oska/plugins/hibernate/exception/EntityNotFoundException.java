@@ -1,4 +1,4 @@
-package me.oska.plugins.openjpa.exception;
+package me.oska.plugins.hibernate.exception;
 
 public class EntityNotFoundException extends RunicException {
 
