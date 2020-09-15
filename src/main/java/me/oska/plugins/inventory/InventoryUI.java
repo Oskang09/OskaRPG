@@ -81,17 +81,17 @@ public abstract class InventoryUI<T> implements Cloneable {
     }
 
     public InventoryUI(InventoryType type, String title) {
-        super();
+        this();
         this.inventory = Bukkit.createInventory(null, type, title);
     }
 
     public InventoryUI(InventoryType type) {
-        super();
+        this();
         this.inventory = Bukkit.createInventory(null, type);
     }
 
     public InventoryUI(String title, int size) {
-        super();
+        this();
         this.inventory = Bukkit.createInventory(null, size, title);
     }
 
@@ -103,9 +103,9 @@ public abstract class InventoryUI<T> implements Cloneable {
     }
 
     @Override
-    protected Object clone() {
+    protected InventoryUI clone() {
         try {
-            return super.clone();
+            return (InventoryUI) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
