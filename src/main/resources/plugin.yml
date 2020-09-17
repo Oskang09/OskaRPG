@@ -4,5 +4,5 @@ main: me.oska.minecraft.OskaRPG
 api-version: 1.16
 prefix: OskaRPG
 load: STARTUP
-depend: [WorldEdit, WorldGuard]
+depend: [WorldEdit, WorldGuard, MythicMobs]
 authors: [Oskang09]

@@ -1,31 +1,26 @@
-package me.oska.plugins;
+package me.oska.plugins.entity;
 
 import lombok.Getter;
-import lombok.Setter;
 import me.oska.plugins.hibernate.AbstractRepository;
-import me.oska.plugins.hibernate.converter.ItemConverter;
+import me.oska.plugins.hibernate.converter.ItemStackConverter;
 import org.bukkit.inventory.ItemStack;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.UUID;
+import java.util.Set;
 
-@Entity
-@Table
+@Entity(name = "orpg_item")
+@Table(name = "orpg_item")
 public class ORPGItem extends BaseEntity {
-    private static AbstractRepository<ORPGItem> repository = new AbstractRepository(ORPGItem.class);
+    private static final AbstractRepository<ORPGItem> repository = new AbstractRepository<>(ORPGItem.class);
 
     @Getter
     @Column(columnDefinition = "jsonb")
-    @Convert(converter = ItemConverter.class)
+    @Convert(converter = ItemStackConverter.class)
     private ItemStack item;
 
     @Id
-    private String uuid;
-
-    @Getter
-    @Setter
-    private String owner;
+    private String id;
 
     @Getter
     private Integer strength;
@@ -45,7 +40,12 @@ public class ORPGItem extends BaseEntity {
     @Getter
     private Integer health;
 
-    public ORPGItem() {
-        this.uuid = UUID.randomUUID().toString();
-    }
+    @Type(type = "jsonb")
+    @Column(name = "skills", columnDefinition = "jsonb")
+    private Set<String> skillIds;
+
+    @Transient
+    private Set<ORPGSkill> skills;
+
+    public ORPGItem() {}
 }

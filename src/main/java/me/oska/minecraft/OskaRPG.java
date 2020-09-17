@@ -1,9 +1,11 @@
 package me.oska.minecraft;
 
 import com.google.gson.Gson;
+import me.oska.minecraft.listener.EntityListener;
 import me.oska.minecraft.listener.ORPGListener;
 import me.oska.minecraft.listener.PlayerListener;
 import me.oska.minecraft.listener.TestListener;
+import me.oska.plugins.entity.ORPGSkill;
 import me.oska.plugins.inventory.InventoryUI;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.hibernate.AbstractRepository;
@@ -78,9 +80,11 @@ public final class OskaRPG extends JavaPlugin {
         service.register(Chat.class, new ORPGChat(orpgPermission), this, ServicePriority.Highest);
 
         InventoryUI.register(this);
+        ORPGSkill.register(this);
         AbstractRepository.setupRepository();
 
         PluginManager manager = getServer().getPluginManager();
+        manager.registerEvents(new EntityListener(), this);
         manager.registerEvents(new TestListener(), this);
         manager.registerEvents(new PlayerListener(), this);
         manager.registerEvents(new ORPGListener(), this);

@@ -1,6 +1,6 @@
 package me.oska.plugins.vault;
 
-import me.oska.plugins.ORPGPlayer;
+import me.oska.plugins.entity.ORPGPlayer;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

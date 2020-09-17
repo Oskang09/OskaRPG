@@ -1,6 +1,5 @@
-package me.oska.plugins;
+package me.oska.plugins.entity;
 
-import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import lombok.Getter;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.hibernate.AbstractRepository;
@@ -9,16 +8,14 @@ import me.oska.plugins.orpg.*;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@Entity
-@Table
+@Entity(name = "orpg_player")
+@Table(name = "orpg_player")
 //@NamedNativeQueries({
 //    @NamedNativeQuery(
 //        name = "ORPGPlayer.getByName",
@@ -88,6 +85,10 @@ public class ORPGPlayer extends BaseEntity {
     @Getter
     private double xp;
 
+    @Getter
+    @Column(name = "isOnline")
+    private boolean isOnline;
+
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private Set<String> permissions;
@@ -125,8 +126,10 @@ public class ORPGPlayer extends BaseEntity {
             );
 
             instance.player = player;
+            instance.isOnline = true;
+            repository.edit(instance);
         } catch (RunicException e) {
-            String message = String.format("Player %s has failed to create new account", player.getUniqueId());
+            String message = String.format("Player %s has failed to join & update", player.getUniqueId());
             player.sendMessage("Error occurs please contact admin with tracker id - " + log.toFile(message, e));
         }
         return players.put(instance.uuid, instance);
@@ -134,6 +137,13 @@ public class ORPGPlayer extends BaseEntity {
 
     public void save() {
         players.remove(uuid);
+        try {
+            this.isOnline = false;
+            repository.edit(this);
+        } catch (RunicException e) {
+            String message = String.format("Player %s has failed to quit & update", player.getUniqueId());
+            player.sendMessage("Error occurs please contact admin with tracker id - " + log.toFile(message, e));
+        }
     }
 
     public Stream<Skill> getTriggerSkills(SkillType type) {

@@ -1,4 +1,4 @@
-package me.oska.plugins;
+package me.oska.plugins.entity;
 
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.exception.RunicException;
@@ -6,8 +6,8 @@ import me.oska.plugins.orpg.ServerStatus;
 
 import javax.persistence.*;
 
-@Entity
-@Table
+@Entity(name = "orpg_server")
+@Table(name = "orpg_server")
 public class ORPGServer extends BaseEntity {
     private static AbstractRepository<ORPGServer> repository = new AbstractRepository(ORPGServer.class);
 

@@ -1,6 +1,7 @@
 package me.oska.minecraft.listener;
 
-import me.oska.plugins.ORPGPlayer;
+import io.lumine.xikage.mythicmobs.MythicMobs;
+import me.oska.plugins.entity.ORPGPlayer;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.orpg.SkillType;
 import org.bukkit.block.Block;
@@ -24,6 +25,8 @@ public class ORPGListener implements Listener {
 
     public static Logger log = new Logger("DamageAPI");
     private static Set<EntityDamageEvent.DamageCause> listenTo;
+    private static MythicMobs mm = MythicMobs.inst();
+
     static {
         listenTo = new HashSet<>();
         listenTo.add(EntityDamageEvent.DamageCause.ENTITY_ATTACK);

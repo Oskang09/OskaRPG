@@ -227,7 +227,7 @@ public class AbstractRepository<T> {
         entityTransaction.begin();
 
         TypedQuery<T> query = entityManager.createNamedQuery(queryName, entityClass);
-        for (int i = 1; i <= arguments.length; i++ ) {
+        for (int i = 1; i <= arguments.length; i++  ) {
             query.setParameter(i, arguments[i-1]);
         }
         T result = query.getSingleResult();
@@ -285,7 +285,7 @@ public class AbstractRepository<T> {
             properties.put("hibernate.dialect", "me.oska.plugins.hibernate.PostgresDialect");
             properties.put("hibernate.show_sql", true);
             properties.put("hibernate.format_sql", true);
-            properties.put("hibernate.hbm2ddl.auto", "create");
+            properties.put("hibernate.hbm2ddl.auto", "update");
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             entityManagerFactory = Persistence.createEntityManagerFactory("persistence-unit", properties);
         }

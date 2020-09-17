@@ -1,6 +1,6 @@
 package me.oska.minecraft.listener;
 
-import me.oska.plugins.ORPGPlayer;
+import me.oska.plugins.entity.ORPGPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;

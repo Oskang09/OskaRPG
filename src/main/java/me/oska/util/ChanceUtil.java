@@ -10,7 +10,7 @@ public class ChanceUtil {
 
     // Default Random : Trigger based on random value
     public static boolean defaultChance(int chance) {
-        return random(100) > chance;
+        return random(100) < chance;
     }
 
     // Pseudo Random: Must over [n] times only will trigger

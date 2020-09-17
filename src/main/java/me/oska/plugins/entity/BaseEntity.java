@@ -1,4 +1,4 @@
-package me.oska.plugins;
+package me.oska.plugins.entity;
 
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
