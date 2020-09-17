@@ -1,17 +1,21 @@
 package me.oska.minecraft;
 
 import com.google.gson.Gson;
-import me.oska.minecraft.listener.EntityListener;
 import me.oska.minecraft.listener.ORPGListener;
-import me.oska.minecraft.listener.PlayerListener;
 import me.oska.minecraft.listener.TestListener;
-import me.oska.plugins.entity.ORPGSkill;
-import me.oska.plugins.inventory.InventoryUI;
+import me.oska.plugins.item.ORPGItem;
 import me.oska.plugins.logger.Logger;
+import me.oska.plugins.mobs.ORPGMob;
+import me.oska.plugins.player.ORPGPlayer;
+import me.oska.plugins.server.ORPGServer;
+import me.oska.plugins.skill.ORPGSkill;
+import me.oska.plugins.event.Events;
+import me.oska.plugins.inventory.InventoryUI;
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.vault.ORPGChat;
 import me.oska.plugins.vault.ORPGEconomy;
 import me.oska.plugins.vault.ORPGPermission;
+import me.oska.plugins.wehouse.WeHouse;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -19,9 +23,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.File;
-import java.sql.SQLException;
 
 public final class OskaRPG extends JavaPlugin {
 
@@ -31,6 +33,7 @@ public final class OskaRPG extends JavaPlugin {
     public OskaRPG() {
         instance = this;
         gson = new Gson();
+
         // Workaround for Hibernate
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
     }
@@ -79,26 +82,20 @@ public final class OskaRPG extends JavaPlugin {
         service.register(Economy.class, new ORPGEconomy(), this, ServicePriority.Highest);
         service.register(Chat.class, new ORPGChat(orpgPermission), this, ServicePriority.Highest);
 
+        Logger.register(this);
+        AbstractRepository.register(this);
         InventoryUI.register(this);
+        Events.register(this);
+        WeHouse.register(this);
         ORPGSkill.register(this);
-        AbstractRepository.setupRepository();
+        ORPGMob.register(this);
+        ORPGServer.register("default",this);
+        ORPGPlayer.register(this);
+        ORPGItem.register(this);
 
         PluginManager manager = getServer().getPluginManager();
-        manager.registerEvents(new EntityListener(), this);
         manager.registerEvents(new TestListener(), this);
-        manager.registerEvents(new PlayerListener(), this);
         manager.registerEvents(new ORPGListener(), this);
-
-        Logger log = new Logger("test realtime");
-        try {
-            AbstractRepository.listen("test", 3000, (notification) -> {
-                log.toConsole("PID: " + notification.getPID());
-                log.toConsole("Channel: " + notification.getName());
-                log.toConsole("Parameter: " + notification.getParameter());
-            });
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

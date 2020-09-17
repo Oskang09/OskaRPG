@@ -1,4 +1,4 @@
-package me.oska.plugins.orpg;
+package me.oska.plugins.skill;
 
 public enum SkillType {
     PLAYER_DAMAGE_PLAYER,

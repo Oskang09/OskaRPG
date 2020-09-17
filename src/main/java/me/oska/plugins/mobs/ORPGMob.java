@@ -1,13 +1,17 @@
-package me.oska.plugins.entity;
+package me.oska.plugins.mobs;
 
+import io.lumine.xikage.mythicmobs.MythicMobs;
 import lombok.Getter;
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.converter.LocationConverter;
+import me.oska.plugins.hibernate.exception.RunicException;
 import me.oska.plugins.logger.Logger;
-import me.oska.plugins.orpg.Skill;
-import me.oska.plugins.orpg.SkillType;
+import me.oska.plugins.skill.ORPGSkill;
+import me.oska.plugins.skill.Skill;
+import me.oska.plugins.skill.SkillType;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -16,39 +20,56 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@javax.persistence.Entity(name = "orpg_mob")
-@Table(name = "orpg_mob")
 public class ORPGMob {
-    private static final Logger log = new Logger("ORPGMob");
-    private static final AbstractRepository<ORPGMob> repository = new AbstractRepository<>(ORPGMob.class);
-    private static final Map<String, ORPGMob> activeMobs = new HashMap<>();
+    private static Logger log;
+    private static AbstractRepository<MobSetting> repository;
+    private static Map<String, ORPGMob> activeMobs;
+    private static Map<String, MobSetting> registeredMobs = new HashMap<>();
+    private static MythicMobs mm;
+
+    public static void register(JavaPlugin plugin) {
+        log = new Logger("ORPGMob");
+        repository = new AbstractRepository<>(MobSetting.class);
+        activeMobs = new HashMap<>();
+        registeredMobs = new HashMap<>();
+        mm = MythicMobs.inst();
+
+        try {
+            repository.findAll().forEach(x -> {
+                if (mm.getMobManager().getMythicMob(x.getId()) == null) {
+                    log.toConsole("Failed to register mobs - " + x.getId());
+                }
+                registeredMobs.put(x.getId(), x);
+            });
+        } catch (RunicException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static ORPGMob getByEntity(Entity entity) {
         return activeMobs.getOrDefault(entity.getUniqueId().toString(), null);
     }
 
     public static ORPGMob createMob(String mobId, Entity entity, Location location) {
-        MobSetting setting = MobSetting.getMobSetting(mobId);
+        MobSetting setting = registeredMobs.getOrDefault(mobId, null);
         ORPGMob mob = new ORPGMob();
         mob.uuid = entity.getUniqueId().toString();
         mob.location = location;
         mob.entity = entity;
-        mob.setting_id = setting.getId();
+        mob.setting = setting;
         mob.strength = setting.getStrength();
         mob.accuracy = setting.getAccuracy();
         mob.dexterity = setting.getDexterity();
         mob.range = setting.getRange();
         mob.damage = setting.getDamage();
         mob.health = setting.getHealth();
-        mob.skills = setting.getSkillIds().stream().map(ORPGSkill::getSkillById).collect(Collectors.toSet());
-
+        mob.skills = setting.getSkills().stream().map(ORPGSkill::getSkillById).collect(Collectors.toSet());
         activeMobs.put(mob.uuid, mob);
-        repository.createAsync(mob, (e) -> log.toDiscord("Error occurs when creating mobs", e));
         return mob;
     }
 
     public void dispose() {
-        repository.removeAsync(this, (e) -> log.toDiscord("Error occurs when removing mobs", e));
+        activeMobs.remove(this.uuid);
     }
 
     private ORPGMob() {}
@@ -58,7 +79,6 @@ public class ORPGMob {
     private String uuid;
 
     @Getter
-    @Convert(converter = LocationConverter.class)
     private Location location;
 
     @Getter
@@ -80,18 +100,12 @@ public class ORPGMob {
     private Integer health;
 
     @Getter
-    @Transient
     private Entity entity;
 
-    @Transient
     private Set<ORPGSkill> skills;
 
     @Getter
-    private String setting_id;
-
-    public MobSetting getSetting() {
-        return MobSetting.getMobSetting(this.setting_id);
-    }
+    private MobSetting setting;
 
     public Stream<Skill> getTriggerSkills(SkillType type) {
         return skills.parallelStream().filter(x -> x.getSkill().trigger(this, type)).map(ORPGSkill::getSkill);

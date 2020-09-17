@@ -1,7 +1,7 @@
-package me.oska.plugins.orpg;
+package me.oska.plugins.skill;
 
-import me.oska.plugins.entity.ORPGMob;
-import me.oska.plugins.entity.ORPGPlayer;
+import me.oska.plugins.mobs.ORPGMob;
+import me.oska.plugins.player.ORPGPlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;

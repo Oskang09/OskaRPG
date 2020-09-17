@@ -1,8 +1,7 @@
 package me.oska.minecraft.listener;
 
-import io.lumine.xikage.mythicmobs.MythicMobs;
 import me.oska.plugins.logger.Logger;
-import me.oska.plugins.wehouse.WeHouseAPI;
+import me.oska.plugins.wehouse.WeHouse;
 import me.oska.plugins.wehouse.WeHouseCutOptions;
 import me.oska.plugins.wehouse.WeHousePasteOptions;
 import org.bukkit.Material;
@@ -25,12 +24,12 @@ public class TestListener implements Listener {
             Block block = event.getClickedBlock();
             if (event.getClickedBlock().getType() == Material.WHITE_WOOL) {
                 WeHouseCutOptions options = new WeHouseCutOptions(player, block, 5, 4);
-                log.withTracker("wehouse cut",() -> WeHouseAPI.cut(options));
+                log.withTracker("wehouse cut",() -> WeHouse.cut(options));
             }
 
             if (event.getClickedBlock().getType() == Material.BLACK_WOOL) {
                 WeHousePasteOptions options = new WeHousePasteOptions(player, block, 5);
-                log.withTracker("wehouse paste",() -> WeHouseAPI.paste(options));
+                log.withTracker("wehouse paste",() -> WeHouse.paste(options));
             }
         }
     }

@@ -1,5 +1,6 @@
 package me.oska.plugins.hibernate;
 
+import com.google.gson.Gson;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.hibernate.action.FindOrCreateCallback;
 import me.oska.plugins.hibernate.async.AsyncCallBackExceptionHandler;
@@ -8,6 +9,7 @@ import me.oska.plugins.hibernate.async.AsyncCallBackObject;
 import me.oska.plugins.hibernate.exception.EntityManagerNotInitializedException;
 import me.oska.plugins.hibernate.exception.EntityNotFoundException;
 import me.oska.plugins.hibernate.exception.RunicException;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 
@@ -20,18 +22,20 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class AbstractRepository<T> {
-    private static Logger log = new Logger("AbstractRepository");
-    private Class<T> entityClass;
+    private static Logger log;
     private static EntityManagerFactory entityManagerFactory;
+    private static Gson gson;
+    private Class<T> entityClass;
 
-    private static int DATABASE_PORT = 5432;
-    private static String DATABASE_HOST = "localhost";
-    private static String DATABASE_USERNAME = "postgres";
-    private static String DATABASE_PASSWORD = "oskang09";
-    private static String DATABASE_SCHEMA = "oskarpg";
+    private static final int DATABASE_PORT = 5432;
+    private static final String DATABASE_HOST = "localhost";
+    private static final String DATABASE_USERNAME = "postgres";
+    private static final String DATABASE_PASSWORD = "oskang09";
+    private static final String DATABASE_SCHEMA = "oskarpg";
     private static String getConnectionString() {
         return "jdbc:postgresql://" + DATABASE_HOST + ":" + DATABASE_PORT + "/" + DATABASE_SCHEMA;
     }
@@ -44,8 +48,9 @@ public class AbstractRepository<T> {
         stmt.execute("LISTEN " + channel);
         stmt.close();
 
+        AtomicBoolean atomic = new AtomicBoolean(true);
         Runnable action = () -> log.withTracker("POSTGRESQL LISTEN - " + channel, () -> {
-            while(true) {
+            do {
                 Statement read = connection.createStatement();
                 read.execute("SELECT 1");
                 read.close();
@@ -56,15 +61,30 @@ public class AbstractRepository<T> {
                 }
 
                 Thread.sleep(intervalInMilli);
-            }
+            } while (atomic.get());
         });
+
         Thread thread = new Thread(action);
         thread.start();
-        return () -> thread.interrupt();
+        return () -> {
+            atomic.set(false);
+            thread.interrupt();
+        };
     }
 
-    public static void setupRepository() {
-        new AbstractRepository();
+    public static void register(JavaPlugin plugin) {
+        log = new Logger("AbstractRepository");
+        gson = new Gson();
+        new AbstractRepository<>();
+
+        try {
+            AbstractRepository.listen("minecraft_server", 5000, (notification) -> {
+                PostgresEvent event = gson.fromJson(notification.getParameter(), PostgresEvent.class);
+                plugin.getServer().getPluginManager().callEvent(event);
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private AbstractRepository() {

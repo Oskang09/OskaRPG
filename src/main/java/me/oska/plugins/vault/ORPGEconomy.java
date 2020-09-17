@@ -1,6 +1,7 @@
 package me.oska.plugins.vault;
 
-import me.oska.plugins.entity.ORPGPlayer;
+import me.oska.plugins.player.ORPGPlayer;
+import me.oska.plugins.player.PlayerData;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;

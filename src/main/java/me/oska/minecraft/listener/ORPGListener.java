@@ -1,9 +1,9 @@
 package me.oska.minecraft.listener;
 
 import io.lumine.xikage.mythicmobs.MythicMobs;
-import me.oska.plugins.entity.ORPGPlayer;
+import me.oska.plugins.player.ORPGPlayer;
 import me.oska.plugins.logger.Logger;
-import me.oska.plugins.orpg.SkillType;
+import me.oska.plugins.skill.SkillType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

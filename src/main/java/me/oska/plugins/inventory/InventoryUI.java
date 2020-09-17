@@ -3,6 +3,7 @@ package me.oska.plugins.inventory;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -20,9 +21,9 @@ public abstract class InventoryUI<T> implements Cloneable {
     }
 
     @Getter
-    private Inventory inventory;
+    protected Inventory inventory;
 
-    private Map<Integer, Consumer<Player>> actions;
+    private final Map<Integer, Consumer<InventoryClickEvent>> actions;
 
     @Getter
     protected T state;
@@ -45,7 +46,7 @@ public abstract class InventoryUI<T> implements Cloneable {
         this.set(index, item, null);
     }
 
-    protected void set(int index, ItemStack item, Consumer<Player> action) {
+    protected void set(int index, ItemStack item, Consumer<InventoryClickEvent> action) {
         this.inventory.setItem(index, item);
         if (action != null) {
             this.actions.put(index, action);
@@ -56,7 +57,7 @@ public abstract class InventoryUI<T> implements Cloneable {
         this.set(index, item, null);
     }
 
-    protected void set(int[] index, ItemStack item, Consumer<Player> action) {
+    protected void set(int[] index, ItemStack item, Consumer<InventoryClickEvent> action) {
         for ( int i = 0; i < index.length; i++) {
             this.inventory.setItem(i, item);
             if (action != null) {
@@ -73,10 +74,10 @@ public abstract class InventoryUI<T> implements Cloneable {
         InventoryListener.goBack(player);
     }
 
-    void click(Player player, int index) {
-        Consumer<Player> action = this.actions.getOrDefault(index, null);
+    void click(InventoryClickEvent event) {
+        Consumer<InventoryClickEvent> action = this.actions.getOrDefault(event.getSlot(), null);
         if (action != null) {
-            action.accept(player);
+            action.accept(event);
         }
     }
 

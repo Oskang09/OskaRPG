@@ -9,12 +9,8 @@ public abstract class RunicException extends Exception {
         this.detailedMessage = detailedMessage;
     }
 
-    private String getDetailedMessage() {
-        return detailedMessage;
-    }
-
     @Override
     public String getMessage() {
-        return this.getMessage();
+        return this.detailedMessage;
     }
 }

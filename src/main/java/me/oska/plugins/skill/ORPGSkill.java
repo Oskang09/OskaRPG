@@ -1,8 +1,10 @@
-package me.oska.plugins.entity;
+package me.oska.plugins.skill;
 
 import me.oska.minecraft.OskaRPG;
+import me.oska.plugins.hibernate.BaseEntity;
 import me.oska.plugins.hibernate.AbstractRepository;
-import me.oska.plugins.orpg.Skill;
+import me.oska.plugins.hibernate.exception.RunicException;
+import me.oska.plugins.logger.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +22,7 @@ import java.util.Map;
 @Entity(name = "orpg_skill")
 @Table(name = "orpg_skill")
 public class ORPGSkill extends BaseEntity {
+    private static Logger log = new Logger("ORPGSKill");
     private static Map<String, ORPGSkill> skills = new HashMap<>();
     private static AbstractRepository<ORPGSkill> repository = new AbstractRepository<>(ORPGSkill.class);
 
@@ -30,6 +33,15 @@ public class ORPGSkill extends BaseEntity {
     public static void register(JavaPlugin plugin) {
         Runnable tick = () -> skills.values().parallelStream().filter(x -> x.skill.tick()).forEach(x -> x.skill.onTick());
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, tick, 0, 20);
+
+        try {
+            repository.findAll().forEach(x -> log.withTracker("Skill Initialization", () -> {
+                x.loadSkill();
+                skills.put(x.id, x);
+            }));
+        } catch (RunicException e) {
+            e.printStackTrace();
+        }
     }
 
     @Id
@@ -60,7 +72,7 @@ public class ORPGSkill extends BaseEntity {
         try (URLClassLoader loader = URLClassLoader.newInstance(urls, OskaRPG.getInstance().getClass().getClassLoader())) {
             Class clazz = loader.loadClass(packageName);
             if (!Skill.class.isAssignableFrom(clazz)){
-                throw new InvalidClassException("Skill '" + fileName + "' doesn't extend me.oska.plugins.orpg.Skill");
+                throw new InvalidClassException("Skill '" + fileName + "' doesn't extend me.oska.plugins.skill.Skill");
             }
             Class<Skill> sc = clazz.asSubclass(Skill.class);
             Constructor<Skill> cst = sc.getConstructor();

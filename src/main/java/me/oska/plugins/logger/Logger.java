@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import me.oska.minecraft.OskaRPG;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -13,10 +14,17 @@ import java.util.*;
 
 public class Logger {
 
-    private static final Object MUTEX = new Object();
-    private static final String DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/753560505255460894/x1Px1wNlKslV1TVnEf5fV-AD60Aj8xxfMq7He2A6mSsBEsFJVejmdGF_jV3kPiKfICeL";
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    private static final TimeZone MALAYSIA_TIMEZONE = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
+    private static Object MUTEX;
+    private static String DISCORD_WEBHOOK;
+    private static SimpleDateFormat DATE_FORMAT;
+    private static TimeZone MALAYSIA_TIMEZONE;
+
+    public static void register(JavaPlugin plugin) {
+        MUTEX = new Object();
+        DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/753560505255460894/x1Px1wNlKslV1TVnEf5fV-AD60Aj8xxfMq7He2A6mSsBEsFJVejmdGF_jV3kPiKfICeL";
+        DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        MALAYSIA_TIMEZONE = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
+    }
 
     private String title;
     private File file;
