@@ -9,8 +9,9 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
 public abstract class Skill {
-    public abstract boolean tick();
+    public abstract boolean useTick();
     public abstract void onTick();
+    public abstract void onEquip(ORPGPlayer player);
     public abstract boolean trigger(ORPGPlayer player, SkillType type);
     public abstract boolean trigger(ORPGMob mob, SkillType type);
     public void playerDamagePlayer(EntityDamageByEntityEvent event, ORPGPlayer attacker, ORPGPlayer victim) {}

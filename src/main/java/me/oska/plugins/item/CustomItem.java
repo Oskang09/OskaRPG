@@ -2,6 +2,7 @@ package me.oska.plugins.item;
 
 import de.tr7zw.nbtapi.NBTItem;
 import lombok.Getter;
+import me.oska.plugins.BaseItem;
 import me.oska.plugins.LevelObject;
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.exception.RunicException;
@@ -15,54 +16,69 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@javax.persistence.Entity(name = "orpg_item")
-@Table(name = "orpg_item")
-public class ORPGItem extends LevelObject {
+@javax.persistence.Entity(name = "custom_item")
+@Table(name = "custom_item")
+public class CustomItem extends LevelObject implements BaseItem {
+    public static final String NBT_KEY = "oskarpg:orpg_item";
+
     private static Logger log;
-    private static Map<String, ORPGItem> activeItems;
-    private static Map<String, ItemSetting> registeredItems;
-    private static AbstractRepository<ItemSetting> itemRepository;
-    private static AbstractRepository<ORPGItem> repository;
+    private static Map<String, CustomItem> items;
+    private static AbstractRepository<CustomItem> repository;
 
     public static void register(JavaPlugin plugin) {
         log = new Logger("ORPGItem");
-        itemRepository = new AbstractRepository<>(ItemSetting.class);
-        repository = new AbstractRepository<>(ORPGItem.class);
-        activeItems = new HashMap<>();
-        registeredItems = new HashMap<>();
+        repository = new AbstractRepository<>(CustomItem.class);
+        items = new HashMap<>();
 
         try {
-            itemRepository.findAll().forEach(x -> registeredItems.put(x.getId(), x));
             repository.findAll().forEach(x -> {
-                x.setting = registeredItems.get(x.setting_id);
-                x.skills = x.setting.getSkill();
-                activeItems.put(x.uuid, x);
+                x.base = BasicItem.getItemById(x.base_id);
+                x.skills = x.base.getSkills();
             });
         } catch (RunicException e) {
             e.printStackTrace();
         }
     }
 
-    public static final String NBT_KEY = "oskarpg:orpg_item";
+    public static CustomItem getItemById(String id) {
+        return items.getOrDefault(id, null);
+    }
+
+    public static CustomItem from(ItemStack item) {
+        NBTItem nbti = new NBTItem(item);
+        String id = nbti.getString("id");
+        return getItemById(id);
+    }
+
     public static boolean is(ItemStack item) {
-        return new NBTItem(item).getString("clazz") == NBT_KEY;
+        return new NBTItem(item).getString("clazz").equals(NBT_KEY);
     }
 
     public static boolean is(ItemStack item, ItemType type) {
         NBTItem nbti = new NBTItem(item);
-        if (nbti.getString("clazz") != NBT_KEY) {
+        if (!nbti.getString("clazz").equals(NBT_KEY)) {
             return false;
         }
         return ItemType.valueOf(nbti.getString("type")) == type;
     }
 
     public ItemStack getItem() {
-        NBTItem nbti = new NBTItem(this.setting.item);
+        NBTItem nbti = new NBTItem(base.item);
         nbti.setString("clazz", NBT_KEY);
-        nbti.setString("type", this.type.toString());
+        nbti.setString("type", base.type.toString());
         nbti.setString("id", this.uuid);
         nbti.setString("owner", this.player_id);
         return nbti.getItem();
+    }
+
+    @Override
+    public ItemType getType() {
+        return base.type;
+    }
+
+    @Override
+    public String getKey() {
+        return NBT_KEY + ":" + uuid;
     }
 
     @Getter
@@ -70,33 +86,30 @@ public class ORPGItem extends LevelObject {
     private String uuid;
 
     @Getter
-    private Integer strength;
+    private int strength;
 
     @Getter
-    private Integer dexterity;
+    private int dexterity;
 
     @Getter
-    private Integer accuracy;
+    private int accuracy;
 
     @Getter
-    private Integer range;
+    private int range;
 
     @Getter
-    private Integer damage;
+    private int damage;
 
     @Getter
-    private Integer health;
+    private int health;
 
     private int experience;
 
     private int level;
 
     private String player_id;
-    private String setting_id;
 
-    @Column(columnDefinition = "VARCHAR(10) default 'MATERIAL'")
-    @Enumerated(EnumType.STRING)
-    protected ItemType type = ItemType.MATERIAL;
+    private String base_id;
 
     @Getter
     @Transient
@@ -104,34 +117,34 @@ public class ORPGItem extends LevelObject {
 
     @Getter
     @Transient
-    private ItemSetting setting;
+    private BasicItem base;
 
-    public ORPGItem() {
+    public CustomItem() {
 
     }
 
     public Integer getTotalStrength() {
-        return setting.getStrength() + strength;
+        return base.getStrength() + strength;
     }
 
     public Integer getTotalDexterity() {
-        return setting.getDexterity() + dexterity;
+        return base.getDexterity() + dexterity;
     }
 
     public Integer getTotalAccuracy() {
-        return setting.getAccuracy() + accuracy;
+        return base.getAccuracy() + accuracy;
     }
 
     public Integer getTotalRange() {
-        return setting.getRange() + range;
+        return base.getRange() + range;
     }
 
     public Integer getTotalDamage() {
-        return setting.getDamage() + damage;
+        return base.getDamage() + damage;
     }
 
     public Integer getTotalHealth() {
-        return setting.getHealth() + health;
+        return base.getHealth() + health;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package me.oska.plugins.skill;
 
+import lombok.Getter;
 import me.oska.minecraft.OskaRPG;
 import me.oska.plugins.hibernate.BaseEntity;
 import me.oska.plugins.hibernate.AbstractRepository;
@@ -31,7 +32,7 @@ public class ORPGSkill extends BaseEntity {
     }
 
     public static void register(JavaPlugin plugin) {
-        Runnable tick = () -> skills.values().parallelStream().filter(x -> x.skill.tick()).forEach(x -> x.skill.onTick());
+        Runnable tick = () -> skills.values().parallelStream().filter(x -> x.skill.useTick()).forEach(x -> x.skill.onTick());
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, tick, 0, 20);
 
         try {
@@ -44,8 +45,10 @@ public class ORPGSkill extends BaseEntity {
         }
     }
 
+    @Getter
     @Id
     private String id;
+
     private String display;
 
     @Column(name = "file_name")

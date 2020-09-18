@@ -3,7 +3,8 @@ package me.oska.minecraft;
 import com.google.gson.Gson;
 import me.oska.minecraft.listener.ORPGListener;
 import me.oska.minecraft.listener.TestListener;
-import me.oska.plugins.item.ORPGItem;
+import me.oska.plugins.item.BasicItem;
+import me.oska.plugins.item.CustomItem;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.mobs.ORPGMob;
 import me.oska.plugins.player.ORPGPlayer;
@@ -33,9 +34,6 @@ public final class OskaRPG extends JavaPlugin {
     public OskaRPG() {
         instance = this;
         gson = new Gson();
-
-        // Workaround for Hibernate
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
     }
 
     public static File getLoggerFolder() {
@@ -82,16 +80,17 @@ public final class OskaRPG extends JavaPlugin {
         service.register(Economy.class, new ORPGEconomy(), this, ServicePriority.Highest);
         service.register(Chat.class, new ORPGChat(orpgPermission), this, ServicePriority.Highest);
 
+        Events.register(this);
         Logger.register(this);
         AbstractRepository.register(this);
         InventoryUI.register(this);
-        Events.register(this);
         WeHouse.register(this);
+        ORPGServer.register("default",this);
         ORPGSkill.register(this);
         ORPGMob.register(this);
-        ORPGServer.register("default",this);
         ORPGPlayer.register(this);
-        ORPGItem.register(this);
+        BasicItem.register(this);
+        CustomItem.register(this);
 
         PluginManager manager = getServer().getPluginManager();
         manager.registerEvents(new TestListener(), this);

@@ -1,12 +1,17 @@
 package me.oska.plugins.player;
 
-import lombok.Getter;
+import me.oska.plugins.BasicAttribute;
+import me.oska.plugins.ConvertibleAttribute;
+import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.BaseEntity;
 import me.oska.plugins.hibernate.converter.InstantConverter;
+import me.oska.plugins.skill.Skill;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 //@NamedNativeQueries({
@@ -19,18 +24,13 @@ import java.util.Set;
 @javax.persistence.Entity(name = "player_data")
 @Table(name = "player_data")
 public class PlayerData extends BaseEntity {
+    private static AbstractRepository<PlayerData> repository = new AbstractRepository<>(PlayerData.class);
 
     @Id
     protected String uuid;
     protected int level;
     protected int experience;
     protected int balance;
-    protected int strength;
-    protected int dexterity;
-    protected int accuracy;
-    protected int range;
-    protected int damage;
-    protected int health;
 
     @Column(name = "isOnline")
     protected boolean isOnline;
@@ -53,15 +53,7 @@ public class PlayerData extends BaseEntity {
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    protected Set<String> constumes;
-
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    protected Set<String> equipments;
-
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    protected Set<String> accessories;
+    protected Map<String, String> equipments;
 
     @Column(columnDefinition = "VARCHAR(6) default 'LOW'")
     @Enumerated(EnumType.STRING)

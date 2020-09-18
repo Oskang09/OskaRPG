@@ -1,5 +1,6 @@
 package me.oska.plugins.event;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.*;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,9 +14,15 @@ import java.util.function.Predicate;
 
 public class Events {
 
-    private static JavaPlugin plugin;
+    private static JavaPlugin instance;
     private static PluginManager manager;
     private static Map<Class<? extends Event>, EventListener> registeredEvents;
+
+    public static void register(JavaPlugin plugin) {
+        registeredEvents = new HashMap<>();
+        instance = plugin;
+        manager = plugin.getServer().getPluginManager();
+    }
 
     private Events() {}
 
@@ -24,7 +31,7 @@ public class Events {
        if (listener == null) {
            listener = new EventListener<T>();
            registeredEvents.put(eventClass, listener);
-           manager.registerEvent(eventClass, listener, EventPriority.HIGHEST, listener, plugin);
+           manager.registerEvent(eventClass, listener, EventPriority.HIGHEST, listener, instance);
        }
        listener.add(predicate, consumer);
     }
@@ -41,12 +48,6 @@ public class Events {
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void register(JavaPlugin pl) {
-        registeredEvents = new HashMap<>();
-        plugin = pl;
-        manager = pl.getServer().getPluginManager();
     }
 
     public static <T extends Event> Runnable listen(Class<T> eventClass, Predicate<T> predicate, Consumer<T> handler) {
