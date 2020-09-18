@@ -69,40 +69,6 @@ public class InventoryListener implements Listener {
         Player player = event.getPlayer();
         if (player.isSneaking()) {
             event.setCancelled(true);
-
-            goTo(player, new InventoryUI<Boolean>("Home", 54) {
-                @Override
-                protected boolean closableByEvent() {
-                    return true;
-                }
-
-                @Override
-                protected Boolean initialState() {
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            setState(false);
-                        }
-                    }, 5000);
-
-                    return true;
-                }
-
-                @Override
-                protected void render() {
-                    if (this.state) {
-                        this.set(0, new ItemStack(Material.STONE), (event) -> event.setCancelled(true));
-                        return;
-                    }
-                    this.set(0, new ItemStack(Material.STONE_SWORD), (event) -> event.setCancelled(true));
-
-                }
-
-                @Override
-                protected void disposeState() {
-
-                }
-            });
         }
     }
 
@@ -116,6 +82,7 @@ public class InventoryListener implements Listener {
 
         InventoryUI inventory = inventoryList.getFirst();
         if (event.getClickedInventory() == inventory.getInventory()) {
+            event.setCancelled(!inventory.options().clickableByDefault);
             inventory.click(event);
         }
     }
@@ -130,7 +97,7 @@ public class InventoryListener implements Listener {
         }
 
         InventoryUI inventory = inventoryList.getFirst();
-        if (inventory.closableByEvent()) {
+        if (inventory.options().closableByEvent) {
             goBack(player);
             return;
         }

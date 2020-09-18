@@ -28,7 +28,7 @@ public abstract class InventoryUI<T> implements Cloneable {
     @Getter
     protected T state;
 
-    protected abstract boolean closableByEvent();
+    protected abstract InventoryOptions options();
     protected abstract T initialState();
     protected abstract void render();
     protected abstract void disposeState();
