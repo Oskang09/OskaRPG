@@ -2,8 +2,10 @@ package me.oska.plugins.logger;
 
 import com.google.gson.JsonObject;
 import me.oska.minecraft.OskaRPG;
+import me.oska.plugins.hibernate.AbstractRepository;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -18,28 +20,21 @@ public class Logger {
     private static String DISCORD_WEBHOOK;
     private static SimpleDateFormat DATE_FORMAT;
     private static TimeZone MALAYSIA_TIMEZONE;
+    private static AbstractRepository<Issue> repository;
+
 
     public static void register(JavaPlugin plugin) {
         MUTEX = new Object();
         DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/753560505255460894/x1Px1wNlKslV1TVnEf5fV-AD60Aj8xxfMq7He2A6mSsBEsFJVejmdGF_jV3kPiKfICeL";
         DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         MALAYSIA_TIMEZONE = TimeZone.getTimeZone("Asia/Kuala_Lumpur");
+        repository = new AbstractRepository<>(Issue.class);
     }
 
     private String title;
-    private File file;
 
     public Logger(String title) {
         this.title = title;
-
-        file = new File(OskaRPG.getLoggerFolder(), title + ".log");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private String trackId() {
@@ -72,7 +67,7 @@ public class Logger {
             final String id = trackId();
             toConsole(id, message, e);
             toDiscord(id, message, e);
-            toFile(id, message, e);
+            toDB(id, message, e);
         }
     }
 
@@ -118,7 +113,7 @@ public class Logger {
                         URL url = new URL(DISCORD_WEBHOOK);
                         HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
                         connection.addRequestProperty("Content-Type", "application/json");
-                        connection.addRequestProperty("User-Agent", "OskaRPG");
+                        connection.addRequestProperty("User-Agent", "OskaRPG-Logger");
                         connection.setRequestMethod("POST");
                         connection.setDoOutput(true);
 
@@ -137,32 +132,38 @@ public class Logger {
         return id;
     }
 
-    public String toFile(String message) {
-        return toFile(null, message, null);
+    public String toDB(String message)  {
+        return toDB(null, message, null);
     }
 
-    public String toFile(String message, Exception e) {
-        return toFile(null, message, e);
+    public String toDB(String message, Exception e)  {
+        return toDB(null, message, e);
     }
 
-    public String toFile(String id, String message, Exception exception) {
-        if (id == null) {
-            id = trackId();
+    public String toDB(String id, String message, Exception exception) {
+        return toDB(id, message, exception, "");
+    }
+
+    public String toDB(String id, String message, Exception exception, String playerUUID) {
+        List<String> players = new ArrayList<>();
+        if (!playerUUID.equals("")) {
+            players.add(playerUUID);
         }
-        String finalId = id;
+        return toDB(id, message,exception, players);
+    }
 
-        new Thread(
-                () -> {
-                    try (FileWriter writer = new FileWriter(file, true)) {
-                        for (String msg : build(finalId, message, exception)) {
-                            writer.append(msg + "\n");
-                        }
-                        writer.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-        ).start();
+    public String toDB(String id, String message, Exception exception, List<String> playerUUID) {
+        Issue issue = new Issue(id);
+        issue.setTitle(this.title);
+        issue.setMessage(message);
+        issue.setTimestamp(DATE_FORMAT.format(Calendar.getInstance(MALAYSIA_TIMEZONE).getTime()));
+        if (playerUUID != null) {
+            issue.setPlayers(playerUUID);
+        }
+        if (exception != null) {
+            issue.setStack(ExceptionUtils.getStackTrace(exception));
+        }
+        repository.createAsync(issue, null);
         return id;
     }
 }

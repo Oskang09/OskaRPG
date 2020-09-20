@@ -2,8 +2,9 @@ package me.oska.plugins.mobs;
 
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import lombok.Getter;
+import lombok.Setter;
+import me.oska.plugins.BaseEntity;
 import me.oska.plugins.hibernate.AbstractRepository;
-import me.oska.plugins.hibernate.converter.LocationConverter;
 import me.oska.plugins.hibernate.exception.RunicException;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.skill.ORPGSkill;
@@ -11,6 +12,7 @@ import me.oska.plugins.skill.Skill;
 import me.oska.plugins.skill.SkillType;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.*;
@@ -20,7 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ORPGMob {
+public class ORPGMob implements BaseEntity {
     private static Logger log;
     private static AbstractRepository<MobSetting> repository;
     private static Map<String, ORPGMob> activeMobs;
@@ -50,7 +52,7 @@ public class ORPGMob {
         return activeMobs.getOrDefault(entity.getUniqueId().toString(), null);
     }
 
-    public static ORPGMob createMob(String mobId, Entity entity, Location location) {
+    public static ORPGMob createMob(String mobId, LivingEntity entity, Location location) {
         MobSetting setting = registeredMobs.getOrDefault(mobId, null);
         ORPGMob mob = new ORPGMob();
         mob.uuid = entity.getUniqueId().toString();
@@ -82,25 +84,29 @@ public class ORPGMob {
     private Location location;
 
     @Getter
-    private Integer strength;
+    private int strength;
 
     @Getter
-    private Integer dexterity;
+    private int dexterity;
 
     @Getter
-    private Integer accuracy;
+    private int accuracy;
 
     @Getter
-    private Integer range;
+    private int range;
 
     @Getter
-    private Integer damage;
+    private int damage;
 
     @Getter
-    private Integer health;
+    private int maxHealth;
 
     @Getter
-    private Entity entity;
+    @Setter
+    private int health;
+
+    @Getter
+    private LivingEntity entity;
 
     private Set<ORPGSkill> skills;
 

@@ -1,10 +1,7 @@
 package me.oska.plugins.player;
 
 import lombok.Getter;
-import me.oska.plugins.BaseItem;
-import me.oska.plugins.BasicAttribute;
-import me.oska.plugins.ConvertibleAttribute;
-import me.oska.plugins.LevelObject;
+import me.oska.plugins.*;
 import me.oska.plugins.event.Events;
 import me.oska.plugins.hibernate.PostgresEvent;
 import me.oska.plugins.item.ItemType;
@@ -16,18 +13,20 @@ import me.oska.plugins.skill.Skill;
 import me.oska.plugins.skill.SkillType;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.time.Instant;
+import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ORPGPlayer extends LevelObject {
+public class ORPGPlayer extends LevelObject implements BaseEntity {
+    private static final int MINECRAFT_MAX_HEALTH = 1024;
     private static Logger log;
     private static AbstractRepository<PlayerData> repository;
     private static Map<String, ORPGPlayer> players;
@@ -72,6 +71,7 @@ public class ORPGPlayer extends LevelObject {
     protected BasicAttribute range;
     protected BasicAttribute damage;
     protected BasicAttribute health;
+    protected int currentHealth;
 
     @Getter
     private PlayerData playerData;
@@ -82,6 +82,12 @@ public class ORPGPlayer extends LevelObject {
 
     public static ORPGPlayer onJoin(Player player) {
         PlayerData instance = null;
+        player.setHealth(MINECRAFT_MAX_HEALTH);
+        player.setHealthScaled(true);
+
+        ORPGPlayer orpgPlayer = new ORPGPlayer();
+        orpgPlayer.player = player;
+
         try {
             instance = repository.findOrCreate(
                     player.getUniqueId().toString(),
@@ -102,18 +108,16 @@ public class ORPGPlayer extends LevelObject {
             repository.edit(instance);
         } catch (RunicException e) {
             String message = String.format("Player %s has failed to join & update", player.getUniqueId());
-            player.sendMessage("Error occurs please contact admin with tracker id - " + log.toFile(message, e));
+            orpgPlayer.onError(log.toDB(message, e));
         }
 
-        ORPGPlayer orpgPlayer = new ORPGPlayer();
-        orpgPlayer.player = player;
         orpgPlayer.listener = Events.listen(PostgresEvent.class, x -> x.getAction().equals("UPDATE_PLAYER:" + player.getUniqueId().toString()),
             (x) -> {
                 try {
                     orpgPlayer.reload();
                 } catch (RunicException e) {
                     String message = String.format("Player %s has failed to reload", player.getUniqueId());
-                    player.sendMessage("Error occurs please contact admin with tracker id - " + log.toFile(message, e));
+                    orpgPlayer.onError(log.toDB(message,e));
                 }
             }
         );
@@ -170,6 +174,12 @@ public class ORPGPlayer extends LevelObject {
         repository.edit(playerData);
     }
 
+    public void onError(String trackerId) {
+        if (player != null) {
+            player.sendMessage("§l§f[§6LOGGER§f] §4Error occurs please contact admin with track id '§0" + trackerId + "§4'");
+        }
+    }
+
     public void onQuit() {
         players.remove(player.getUniqueId().toString());
         if (listener != null) {
@@ -182,7 +192,7 @@ public class ORPGPlayer extends LevelObject {
             save();
         } catch (RunicException e) {
             String message = String.format("Player %s has failed to save when logout", playerData.uuid);
-            log.toFile(message, e);
+            onError(log.toDB(message, e));
         }
     }
 
@@ -223,7 +233,7 @@ public class ORPGPlayer extends LevelObject {
             save();
         } catch (RunicException e) {
             String message = String.format("Player %s has failed to calculate equipments stats", playerData.uuid);
-            player.sendMessage("Error occurs please contact admin with tracker id - " + log.toFile(message, e));
+            onError(log.toDB(message, e));
         }
     }
 
@@ -238,7 +248,7 @@ public class ORPGPlayer extends LevelObject {
             save();
         } catch (RunicException e) {
             String message = String.format("Player %s has failed to withdraw balance %d", playerData.uuid, amount);
-            return "Error occurs please contact admin with tracker id - " + log.toFile(message, e);
+            onError(log.toDB(message, e));
         }
         return null;
     }
@@ -250,11 +260,7 @@ public class ORPGPlayer extends LevelObject {
             save();
         } catch (RunicException e) {
             String message = String.format("Player %s has failed to deposit balance %d", playerData.uuid, amount);
-            String properError = "Error occurs please contact admin with tracker id - " + log.toFile(message, e);
-            if (player != null) {
-                player.sendMessage(properError);
-            }
-            return properError;
+            onError(log.toDB(message, e));
         }
         return null;
     }
@@ -268,10 +274,7 @@ public class ORPGPlayer extends LevelObject {
                 }
             } catch (RunicException e) {
                 String message = String.format("Player %s has failed to add new permission %d", playerData.uuid, permission);
-                String properError = "Error occurs please contact admin with tracker id - " + log.toFile(message, e);
-                if (player != null) {
-                    player.sendMessage(properError);
-                }
+                onError(log.toDB(message, e));
             }
         }
     }
@@ -285,11 +288,33 @@ public class ORPGPlayer extends LevelObject {
                 }
             } catch (RunicException e) {
                 String message = String.format("Player %s has failed to remove new permission %d", playerData.uuid, permission);
-                String properError = "Error occurs please contact admin with tracker id - " + log.toFile(message, e);
-                if (player != null) {
-                    player.sendMessage(properError);
-                }
+                onError(log.toDB(message, e));
             }
         }
+    }
+
+    @Override
+    public int getHealth() {
+        return currentHealth;
+    }
+
+    @Override
+    public void setHealth(int health) {
+        currentHealth = health;
+    }
+
+    @Override
+    public int getMaxHealth() {
+        return health.getTotal();
+    }
+
+    @Override
+    public int getDamage() {
+        return damage.getTotal();
+    }
+
+    @Override
+    public LivingEntity getEntity() {
+        return player;
     }
 }

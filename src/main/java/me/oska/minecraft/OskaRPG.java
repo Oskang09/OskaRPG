@@ -17,6 +17,7 @@ import me.oska.plugins.vault.ORPGChat;
 import me.oska.plugins.vault.ORPGEconomy;
 import me.oska.plugins.vault.ORPGPermission;
 import me.oska.plugins.wehouse.WeHouse;
+import me.oska.util.BannerUtil;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -34,14 +35,6 @@ public final class OskaRPG extends JavaPlugin {
     public OskaRPG() {
         instance = this;
         gson = new Gson();
-    }
-
-    public static File getLoggerFolder() {
-        File file = new File(getInstance().getDataFolder(), "log");
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return file;
     }
 
     public static File getSkillFolder() {
@@ -74,15 +67,17 @@ public final class OskaRPG extends JavaPlugin {
             getDataFolder().mkdirs();
         }
 
+        BannerUtil.initialize();
+        AbstractRepository.register(this);
+        Events.register(this);
+        Logger.register(this);
+
         ServicesManager service = getServer().getServicesManager();
         ORPGPermission orpgPermission = new ORPGPermission();
         service.register(Permission.class, orpgPermission, this, ServicePriority.Highest);
         service.register(Economy.class, new ORPGEconomy(), this, ServicePriority.Highest);
         service.register(Chat.class, new ORPGChat(orpgPermission), this, ServicePriority.Highest);
 
-        Events.register(this);
-        Logger.register(this);
-        AbstractRepository.register(this);
         InventoryUI.register(this);
         WeHouse.register(this);
         ORPGServer.register("default",this);
