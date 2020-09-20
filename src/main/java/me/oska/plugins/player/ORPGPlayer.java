@@ -64,7 +64,7 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
     private Player player;
 
     protected Map<ItemType, BaseItem> equipments;
-    private List<ORPGSkill> skills;
+    protected List<ORPGSkill> skills;
     protected ConvertibleAttribute strength;
     protected ConvertibleAttribute dexterity;
     protected ConvertibleAttribute accuracy;
@@ -98,6 +98,7 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
                         entity.experience = 0;
                         entity.balance = 0;
                         entity.permissions = new HashSet<>();
+                        entity.equipments = new HashMap<>();
                         entity.createdAt = Instant.now();
                         entity.updatedAt = Instant.now();
                         entity.lastOnline = Instant.now();
@@ -110,6 +111,8 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
             String message = String.format("Player %s has failed to join & update", player.getUniqueId());
             orpgPlayer.onError(log.toDB(message, e));
         }
+
+        // TODO: should load all equipments & run equipmentCalculation
 
         orpgPlayer.listener = Events.listen(PostgresEvent.class, x -> x.getAction().equals("UPDATE_PLAYER:" + player.getUniqueId().toString()),
             (x) -> {

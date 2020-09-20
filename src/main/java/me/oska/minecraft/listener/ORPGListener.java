@@ -56,10 +56,13 @@ public class ORPGListener implements Listener {
     @EventHandler( priority = EventPriority.MONITOR )
     public void onDamage(EntityDamageByEntityEvent event)
     {
-        if (!customized.contains(event.getCause())){
-            // handled by ProjectileHitEvent
-            if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) return;
+        // handled by ProjectileHitEvent & damage handled by BaseEntity.damageBy()
+        if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE){
+            event.setDamage(0);
+            return;
+        }
 
+        if (!customized.contains(event.getCause())){
             Entity victim = event.getEntity();
             if (victim instanceof Player) {
                 ORPGPlayer.getByPlayer((Player) victim).damageBy(null, (int)event.getDamage());
@@ -69,6 +72,7 @@ public class ORPGListener implements Listener {
             return;
         }
 
+        event.setDamage(0);
         ORPGEvent<EntityDamageByEntityEvent> custom = new ORPGEvent<>(event);
         Entity attacker = event.getDamager();
         Entity victim = event.getEntity();
