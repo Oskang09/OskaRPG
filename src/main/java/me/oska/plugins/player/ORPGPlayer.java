@@ -13,6 +13,7 @@ import me.oska.plugins.skill.Skill;
 import me.oska.plugins.skill.SkillType;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,7 +21,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.time.Instant;
-import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -82,6 +82,7 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
 
     public static ORPGPlayer onJoin(Player player) {
         PlayerData instance = null;
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(MINECRAFT_MAX_HEALTH);
         player.setHealth(MINECRAFT_MAX_HEALTH);
         player.setHealthScaled(true);
 
@@ -125,6 +126,11 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
             }
         );
         orpgPlayer.playerData = instance;
+        orpgPlayer.skills = new ArrayList<>();
+        orpgPlayer.damage = new BasicAttribute(100);
+        orpgPlayer.health = new BasicAttribute(1000);
+        orpgPlayer.currentHealth = 500;
+        orpgPlayer.updateHealthBar();
         return players.put(instance.uuid, orpgPlayer);
     }
 

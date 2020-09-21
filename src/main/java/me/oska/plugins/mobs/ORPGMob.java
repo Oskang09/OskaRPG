@@ -37,12 +37,7 @@ public class ORPGMob implements BaseEntity {
         mm = MythicMobs.inst();
 
         try {
-            repository.findAll().forEach(x -> {
-                if (mm.getMobManager().getMythicMob(x.getId()) == null) {
-                    log.toConsole("Failed to register mobs - " + x.getId());
-                }
-                registeredMobs.put(x.getId(), x);
-            });
+            repository.findAll().forEach(x -> registeredMobs.put(x.getId(), x));
         } catch (RunicException e) {
             e.printStackTrace();
         }

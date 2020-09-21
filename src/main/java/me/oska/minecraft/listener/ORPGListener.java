@@ -1,5 +1,6 @@
 package me.oska.minecraft.listener;
 
+import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,10 +17,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.HashSet;
@@ -170,5 +168,17 @@ public class ORPGListener implements Listener {
             orpg_attacker.getTriggerSkills(SkillType.PLAYER_SHOOT)
                     .forEach(x -> x.playerShoot(custom, orpg_attacker));
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onHPRegain(EntityRegainHealthEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onRespawn(PlayerPostRespawnEvent event) {
+        ORPGPlayer player = ORPGPlayer.getByPlayer(event.getPlayer());
+        player.setHealth(player.getMaxHealth());
+        player.updateHealthBar();
     }
 }

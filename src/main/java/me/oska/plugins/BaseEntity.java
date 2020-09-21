@@ -1,5 +1,6 @@
 package me.oska.plugins;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -11,6 +12,12 @@ public interface BaseEntity {
     int getMaxHealth();
     int getDamage();
     LivingEntity getEntity();
+
+    default void updateHealthBar() {
+        LivingEntity victim = getEntity();
+        double percent = (double)getHealth() / getMaxHealth();
+        victim.setHealth(percent * MINECRAFT_MAX_HEALTH);
+    }
 
     default void damageBy(LivingEntity attacker, int damage) {
         LivingEntity victim = getEntity();
@@ -26,8 +33,7 @@ public interface BaseEntity {
         }
 
         setHealth(current - damage);
-        int percent = (int)Math.floor(getMaxHealth() / getHealth());
-        victim.setHealth(percent * MINECRAFT_MAX_HEALTH);
         victim.setLastDamage(damage);
+        updateHealthBar();
     }
 }
