@@ -3,7 +3,7 @@ package me.oska.plugins.player;
 import lombok.Getter;
 import me.oska.plugins.*;
 import me.oska.plugins.event.Events;
-import me.oska.plugins.hibernate.PostgresEvent;
+import me.oska.plugins.server.AsyncServerUpdateEvent;
 import me.oska.plugins.item.ItemType;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.hibernate.AbstractRepository;
@@ -115,7 +115,7 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
 
         // TODO: should load all equipments & run equipmentCalculation
 
-        orpgPlayer.listener = Events.listen(PostgresEvent.class, x -> x.getAction().equals("UPDATE_PLAYER:" + player.getUniqueId().toString()),
+        orpgPlayer.listener = Events.listen(AsyncServerUpdateEvent.class, x -> x.getAction().equals("UPDATE_PLAYER:" + player.getUniqueId().toString()),
             (x) -> {
                 try {
                     orpgPlayer.reload();

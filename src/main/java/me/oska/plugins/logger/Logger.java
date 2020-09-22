@@ -153,7 +153,9 @@ public class Logger {
     }
 
     public String toDB(String id, String message, Exception exception, List<String> playerUUID) {
-        Issue issue = new Issue(id);
+        Issue issue = new Issue();
+        issue.setTrackId(id);
+        issue.setServerId("");
         issue.setTitle(this.title);
         issue.setMessage(message);
         issue.setTimestamp(DATE_FORMAT.format(Calendar.getInstance(MALAYSIA_TIMEZONE).getTime()));

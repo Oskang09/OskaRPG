@@ -4,8 +4,12 @@
 * `me.oska.plugins` will be storing plugin related code, it can be expose an API for getting information or action.
 * `me.oska.extension` will be storing extension code, etc Custom Skill or Setting.
 
-# Using Database ( OpenJPA 2.2 & PostgreSQL )
+# Using Database ( Hibernate & PostgreSQL )
 
 Currently, all database action will be using `AbstractRepository<Model>`, it comes with basic crud and can be run asynchronously.
 
-# Using IO ( LightningStorage & JSON )
+# Environment Variables
+
+Variables | Usage
+ --- | --- 
+ OSKARPG_SERVER_ID | Define current server using which ORPGServer instance to setup

@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 public class AbstractRepository<T> {
     private static Logger log;
     private static EntityManagerFactory entityManagerFactory;
-    private static Gson gson;
     private Class<T> entityClass;
 
     private static final int DATABASE_PORT = 5432;
@@ -56,8 +55,8 @@ public class AbstractRepository<T> {
                 read.close();
 
                 PGNotification[] notifications = postgres.getNotifications();
-                if (notifications!= null) {
-                    Arrays.stream(postgres.getNotifications()).forEach(consumer);
+                if (notifications != null) {
+                    Arrays.stream(notifications).forEach(consumer);
                 }
 
                 Thread.sleep(intervalInMilli);
@@ -74,17 +73,7 @@ public class AbstractRepository<T> {
 
     public static void register(JavaPlugin plugin) {
         log = new Logger("AbstractRepository");
-        gson = new Gson();
         new AbstractRepository<>();
-
-        try {
-            AbstractRepository.listen("minecraft_server", 5000, (notification) -> {
-                PostgresEvent event = gson.fromJson(notification.getParameter(), PostgresEvent.class);
-                plugin.getServer().getPluginManager().callEvent(event);
-            });
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     private AbstractRepository() {
@@ -111,7 +100,9 @@ public class AbstractRepository<T> {
             try {
                 create(entity);
             } catch (RunicException e) {
-                asyncCallBackExceptionHandler.error(e);
+                if (asyncCallBackExceptionHandler != null) {
+                    asyncCallBackExceptionHandler.error(e);
+                }
             }
         }).start();
     }
@@ -131,9 +122,14 @@ public class AbstractRepository<T> {
     public void editAsync(T entity, AsyncCallBackObject<T> asyncCallBackObject, AsyncCallBackExceptionHandler asyncCallBackExceptionHandler) {
         new Thread(() -> {
             try {
-                asyncCallBackObject.done(edit(entity));
+                T newEntity = edit(entity);
+                if (asyncCallBackObject != null) {
+                    asyncCallBackObject.done(newEntity);
+                }
             } catch (RunicException e) {
-                asyncCallBackExceptionHandler.error(e);
+                if (asyncCallBackExceptionHandler != null) {
+                    asyncCallBackExceptionHandler.error(e);
+                }
             }
         }).start();
     }
@@ -154,7 +150,9 @@ public class AbstractRepository<T> {
             try {
                 remove(entity);
             } catch (RunicException e) {
-                asyncCallBackExceptionHandler.error(e);
+                if (asyncCallBackExceptionHandler != null) {
+                    asyncCallBackExceptionHandler.error(e);
+                }
             }
         }).start();
     }

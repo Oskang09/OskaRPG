@@ -178,5 +178,13 @@
             <type>jar</type>
             <systemPath>${pom.basedir}/plugins/MythicMobs-4.10.1.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.volmit.react</groupId>
+            <artifactId>React</artifactId>
+            <version>6.636.0</version>
+            <scope>system</scope>
+            <type>jar</type>
+            <systemPath>${pom.basedir}/plugins/React-6.636.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

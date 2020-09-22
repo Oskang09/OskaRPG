@@ -1,4 +1,4 @@
-package me.oska.plugins.hibernate;
+package me.oska.plugins.server;
 
 import com.google.gson.Gson;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class PostgresEvent extends Event {
+public class AsyncServerUpdateEvent extends Event {
     private static Gson gson = new Gson();
     private static final HandlerList HANDLERS = new HandlerList();
 
