@@ -8,9 +8,12 @@ import me.oska.plugins.item.ItemType;
 import me.oska.plugins.logger.Logger;
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.exception.RunicException;
+import me.oska.plugins.server.ORPGServer;
 import me.oska.plugins.skill.ORPGSkill;
 import me.oska.plugins.skill.Skill;
 import me.oska.plugins.skill.SkillType;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
@@ -20,6 +23,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
+import org.bukkit.scoreboard.Scoreboard;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -131,6 +139,7 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
         orpgPlayer.health = new BasicAttribute(1000);
         orpgPlayer.currentHealth = 500;
         orpgPlayer.updateHealthBar();
+        orpgPlayer.updateTabBar();
         return players.put(instance.uuid, orpgPlayer);
     }
 
@@ -181,6 +190,23 @@ public class ORPGPlayer extends LevelObject implements BaseEntity {
     public void save() throws RunicException {
         playerData.updatedAt = Instant.now();
         repository.edit(playerData);
+    }
+
+    public void updateScoreboard() {
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        Objective objective = scoreboard.registerNewObjective(playerData.uuid, "player-board", "OskaRPG Board");
+        objective.setRenderType(RenderType.INTEGER);
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        // objective.getScore("").setScore(0);
+
+        player.setScoreboard(scoreboard);
+    }
+
+    public void updateTabBar() {
+        ORPGServer server = ORPGServer.getServer();
+        String header = server.getHeader();
+        String footer = server.getFooter();
+        player.setPlayerListHeaderFooter(new ComponentBuilder(header).create(), new ComponentBuilder(footer).create());
     }
 
     public void onError(String trackerId) {

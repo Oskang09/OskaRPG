@@ -3,6 +3,7 @@ package me.oska.plugins.server;
 import com.google.gson.Gson;
 import com.volmit.react.React;
 import com.volmit.react.api.ISampler;
+import lombok.Getter;
 import me.oska.plugins.hibernate.BaseEntity;
 import me.oska.plugins.hibernate.AbstractRepository;
 import me.oska.plugins.hibernate.converter.InstantConverter;
@@ -72,4 +73,12 @@ public class ORPGServer extends BaseEntity {
     @Convert(converter = InstantConverter.class)
     @Column(name = "updatedAt")
     private Instant lastUpdated;
+
+    @Getter
+    @Column(columnDefinition = "text")
+    private String header;
+
+    @Getter
+    @Column(columnDefinition = "text")
+    private String footer;
 }
