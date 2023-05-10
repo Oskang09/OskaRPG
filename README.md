@@ -12,6 +12,7 @@ Mainly plan to build up own game server but lack of time to maintain it, so will
 6. Applying attributes stats to all of the playable entity ( player, mobs )
 7. Build logger to track error via Discord Webhook
 8. Custom function with other plugin to achieve moving house time to time ( WeHouse ) 
+9. Custom a player object to support serializable saving ( data, stats, status )
 
 # Folder Structure
 
